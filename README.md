@@ -17,7 +17,7 @@ Example:
 ### Styling
 `<zoomable-bar-chart>` provides the following custom properties and mixins for styling:
 Custom property          | Description                                    | Default
--------------------------|------------------------------------------------|------------------------
+-------------------------|------------------------------------------------|-------------------------
 `--chart-axis-color`     | Color for axis lines and labels                | #727272
 `--chart-text-color`     | Text color for title text                      | --paper-blue-grey-800
 `--chart-color-1`        | Color for first bar in chart (16 colors total) | --paper-blue-500
