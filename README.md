@@ -39,3 +39,24 @@ Custom property          | Description                                    | Defa
 `--chart-color-16`       | Sixteenth bar color                            | --paper-light-blue-500
 `--chart-other-color`    | Color for potential other category             | --paper-grey-500
 `--chart-overview-color` | Color for bars in overview used for zooming    | --paper-blue-grey-900
+
+### Dependencies
+
+Dependencies are installed using [Bower](http://bower.io/):
+
+    npm install -g bower
+    bower install
+
+### Testing
+
+Tests are run using [web-component-tester](https://github.com/Polymer/web-component-tester):
+
+    npm install -g web-component-tester
+    wct
+
+### Demonstration & Documentation
+
+Demonstration and documentation are viewed using [polyserve](https://github.com/PolymerLabs/polyserve):
+
+    npm install -g polyserve
+    polyserve
