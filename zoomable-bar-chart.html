@@ -35,7 +35,8 @@ zoom in on specific areas of the data.
       default-label="Unknown Location"
       height="300"
       chart-title="{{chartTitle}}"
-      loading="[[chartLoading]]">
+      loading="[[chartLoading]]"
+      selected="[[selected]]">
     </zoomable-bar-chart>
 ```
 
@@ -303,6 +304,20 @@ Custom property          | Description                                    | Defa
           loading: {
             type: Boolean,
             value: false,
+            notify: true
+          },
+
+          /**
+           * (Optional)
+           *
+           * Domain values currently selected in the chart. If this chart is a timeline,
+           * the start date and end date will be saved in this array as strings.
+           * Otherwise, all terms selected will be saved in the array.
+           *
+           * @type {Array}
+           */
+          selected: {
+            type: Array,
             notify: true
           },
 
@@ -696,6 +711,40 @@ Custom property          | Description                                    | Defa
 
           brush.on('brush', onBrushed);
 
+          // When user finishes selecting an area, save that selection in selected property
+          // (or clear that property if user clears their selection)
+          var onBrushEnd = function() {
+            if(!brush.empty()) {
+              self.set('selected', self.timeline ? [self._formatDateToESString(x.domain()[0]),
+                self._formatDateToESString(x.domain()[x.domain().length - 1])] : x.domain());
+            } else {
+              self.set('selected', []);
+            }
+          };
+
+          brush.on('brushend', onBrushEnd);
+
+          // if selected has previously been set and the chart is being resized, manually set brush based on those values
+          if(self.selected && self.selected.length && data) {
+            var extentCalculation;
+            if(self.timeline) {
+              extentCalculation = d3.extent(data.map(function(bar) {
+                if(new Date(self.selected[0]) <= bar.barValue && new Date(self.selected[1]) >= bar.barValue) {
+                  return x(bar.barValue) + x.rangeBand() / 2;
+                }
+              }));
+            } else {
+              extentCalculation = d3.extent(data.map(function(bar) {
+                if(self.selected[0] === bar.barValue ||
+                  self.selected[self.selected.length - 1] === bar.barValue) {
+                  return x(bar.barValue) + x.rangeBand() / 2;
+                }
+              }));
+            }
+            brush.extent(extentCalculation);
+            onBrushed();
+          }
+
           overview.append('g')
             .attr('class', 'x brush')
             .call(brush)
@@ -761,6 +810,17 @@ Custom property          | Description                                    | Defa
             return 'Year of ' + moment.utc(date).format('YYYY');
           }
           return moment.utc(date).format('MMM D, YYYY');
+        },
+
+        /**
+         * Creates a string representation of a date to use to query
+         * elasticsearch (ex: '2016-08-02T00:00:00')
+         *
+         * @param {Date} date
+         * @return {String} date as string
+         */
+        _formatDateToESString: function(date) {
+          return moment(date).format('YYYY-MM-DD') + 'T00:00:00';
         },
 
         /**

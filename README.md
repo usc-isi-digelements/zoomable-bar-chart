@@ -1,5 +1,6 @@
 # zoomable-bar-chart
-A Polymer element that creates a bar chart using d3 with the ability to zoom in on specific areas of the data.
+A Polymer element that creates a bar chart using d3 with the ability to zoom in on specific areas of the data and preserve
+that selection for use as a filter.
 
 Example:
 ```html
@@ -10,7 +11,8 @@ Example:
         default-label="Unknown Location"
         height="300"
         chart-title="{{chartTitle}}"
-        loading="[[chartLoading]]">
+        loading="[[chartLoading]]"
+        selected="[[selected]]">
     </zoomable-bar-chart>
 ```
 
