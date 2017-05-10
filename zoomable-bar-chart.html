@@ -728,7 +728,8 @@ Custom property          | Description                                    | Defa
           // When user finishes selecting an area, save that selection in selected property
           // (or clear that property if user clears their selection)
           var onBrushEnd = function() {
-            if(!brush.empty()) {
+            if(!brush.empty() && x.domain().length) {
+              // if this is a timeline, get the start and end values (otherwise, use entire selection)
               self.set('selected', self.timeline ? [self._formatDateToESString(x.domain()[0]),
                 self._formatDateToESString(x.domain()[x.domain().length - 1])] : x.domain());
             } else {
