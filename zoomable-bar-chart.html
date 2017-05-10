@@ -322,6 +322,20 @@ Custom property          | Description                                    | Defa
           },
 
           /**
+           * (Optional)
+           *
+           * Whether or not to display instructions about filtering in the area where a user can zoom
+           * in on the data.
+           *
+           * @type {Boolean}
+           * @default false
+           */
+          displayFilterText: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
            * The data that is displayed in the bar chart.  Computed from the data.
            *
            * @default []
@@ -562,7 +576,7 @@ Custom property          | Description                                    | Defa
             .style('fill', this.getComputedStyleValue('--bar-chart-text-color'))
             .style('font-size', '14px')
             .style('font-weight', 'bold')
-            .text('Click and drag on the chart below to zoom.  Click elsewhere to reset the zoom.');
+            .text(self._getSelectionInstructions());
 
           var overview = svg.append('g')
             .attr('class', 'overview')
@@ -944,6 +958,20 @@ Custom property          | Description                                    | Defa
           xAxis.tickValues(xTruncatedDomain);
           if(xAxisOverview) {
             xAxisOverview.tickValues(xTruncatedDomain);
+          }
+        },
+
+        /**
+         * Return the correct instructions to display in the selection area based on the value of displayFilterText.
+         *
+         * @return {String} instructionText
+         * @private
+         */
+        _getSelectionInstructions: function() {
+          if(this.displayFilterText) {
+            return 'Click and drag on the chart below to zoom and select a range filter.  Click elsewhere to reset.';
+          } else {
+            return 'Click and drag on the chart below to zoom.  Click elsewhere to reset the zoom.';
           }
         },
 

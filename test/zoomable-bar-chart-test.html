@@ -98,6 +98,10 @@ limitations under the License.
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Other']);
         });
 
+        test('displayFilterText is correct', function() {
+          expect(element.displayFilterText).to.be.false;
+        });
+
         test('chartTitle should exist', function() {
           expect(element.chartTitle).to.be.a('String');
           expect(element.chartTitle).to.equal('Data at July 01, 2016');
@@ -191,6 +195,14 @@ limitations under the License.
           expect(element._getTruncatedDomain(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'])).to.deep.equal(['A', 'C', 'E', 'G', 'I', 'K']);
           expect(element._getTruncatedDomain(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'])).to.deep.equal(['A', 'C', 'E', 'G', 'I', 'K', 'M', 'O', 'Q', 'S']);
           expect(element._getTruncatedDomain(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U'])).to.deep.equal(['A', 'D', 'G', 'J', 'M', 'P', 'S']);
+        });
+
+        test('_getSelectionInstructions returns correct results', function() {
+          expect(element._getSelectionInstructions()).to.equal('Click and drag on the chart below to zoom.  Click elsewhere to reset the zoom.');
+
+          element.displayFilterText = true;
+
+          expect(element._getSelectionInstructions()).to.equal('Click and drag on the chart below to zoom and select a range filter.  Click elsewhere to reset.');
         });
       });
 
