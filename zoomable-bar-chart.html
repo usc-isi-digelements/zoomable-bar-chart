@@ -756,6 +756,12 @@ Custom property          | Description                                    | Defa
                 }
               }));
             }
+            // if extent is only one bar, make sure to redraw brush only around that bar
+            if(extentCalculation[0] === extentCalculation[1]) {
+              var singlePercentageOfBarWidth = x.rangeBand() / 100 * 0.01;
+              extentCalculation[0] = extentCalculation[0] - (x.rangeBand() / 2) + singlePercentageOfBarWidth;
+              extentCalculation[1] = extentCalculation[1] + (x.rangeBand() / 2) - singlePercentageOfBarWidth;
+            }
             brush.extent(extentCalculation);
             onBrushed();
           }
