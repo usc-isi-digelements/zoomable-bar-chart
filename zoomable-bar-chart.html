@@ -34,7 +34,6 @@ zoom in on specific areas of the data.
       data="[[data]]"
       default-label="Unknown Location"
       height="300"
-      chart-title="{{chartTitle}}"
       loading="[[chartLoading]]"
       selected="[[selected]]">
     </zoomable-bar-chart>
@@ -48,7 +47,7 @@ on the amount of data being displayed:
 Custom property          | Description                                    | Default
 -------------------------|------------------------------------------------|--------------------------
 `--chart-axis-color`     | Color for axis lines and labels                | #727272
-`--chart-text-color`     | Text color for title text                      | --paper-blue-grey-800
+`--chart-text-color`     | Text color for info text                       | --paper-blue-grey-800
 `--chart-color-1`        | Color for first bar in chart (16 colors total) | --paper-blue-500
 `--chart-color-2`        | Second color for bars in chart                 | --paper-orange-500
 `--chart-color-3`        | Third color for bars in chart                  | --paper-green-500
@@ -225,7 +224,7 @@ Custom property          | Description                                    | Defa
           /**
            * (Optional)
            *
-           * The source of the data to use in the title for this bar chart.
+           * The source of the data to use in the info text for this bar chart.
            *
            * @type {String}
            * @default 'Data'
@@ -275,21 +274,6 @@ Custom property          | Description                                    | Defa
             value: function() {
               return [];
             },
-            notify: true
-          },
-
-          /**
-           * (Output)
-           *
-           * The title for the bar chart.
-           *
-           * @type {String}
-           * @default 'No Data'
-           */
-          chartTitle: {
-            type: String,
-            value: 'No Data',
-            computed: '_computeTitle(source, _bars.length)',
             notify: true
           },
 
@@ -377,21 +361,6 @@ Custom property          | Description                                    | Defa
             this._createBars(data);
             this._createElements();
           }
-        },
-
-        /**
-         * Returns the title for this bar chart based on the source and the bars.
-         *
-         * @param {String} source
-         * @param {Number} count
-         * @return {String} title
-         * @private
-         */
-        _computeTitle: function(source, count) {
-          if(count > 1) {
-            return source + ' from ' + this._bars[0].barLabel + ' to ' + this._bars[count - 1].barLabel;
-          }
-          return count ? (source + ' at ' + this._bars[0].barLabel) : ('No ' + source);
         },
 
         /**
@@ -597,7 +566,10 @@ Custom property          | Description                                    | Defa
             var xDomain = x.domain();
             var from = self.timeline ? self._getDateText(new Date(xDomain[0]), self.interval) : xDomain[0];
             var to = self.timeline ? self._getDateText(new Date(xDomain[xDomain.length - 1]), self.interval) : xDomain[xDomain.length - 1];
-            return 'Showing ' + from + ' to ' + to;
+            if(from === to) {
+              return self.source + ' on ' + from;
+            }
+            return self.source + ' from ' + from + ' to ' + to;
           };
 
           info.text(createExtentText());

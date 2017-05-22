@@ -102,18 +102,6 @@ limitations under the License.
           expect(element.displayFilterText).to.be.false;
         });
 
-        test('chartTitle should exist', function() {
-          expect(element.chartTitle).to.be.a('String');
-          expect(element.chartTitle).to.equal('Data at July 01, 2016');
-        });
-
-        test('chartTitle should use source', function() {
-          element.source = 'Unit Tests';
-          expect(element.source).to.equal('Unit Tests');
-          expect(element.chartTitle).to.be.a('String');
-          expect(element.chartTitle).to.equal('Unit Tests at July 01, 2016');
-        });
-
         test('_getD3Interval returns correct results', function() {
           expect(element._getD3Interval('day')).to.deep.equal(d3.time.day);
           expect(element._getD3Interval('week')).to.deep.equal(d3.time.monday);
@@ -275,11 +263,6 @@ limitations under the License.
         test('_legend is correct', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Thing']);
         });
-
-        test('chartTitle should exist', function() {
-          expect(element.chartTitle).to.be.a('String');
-          expect(element.chartTitle).to.be.equal('Data at July 01, 2016');
-        });
       });
 
       suite('<zoomable-bar-chart> with no data', function() {
@@ -302,11 +285,6 @@ limitations under the License.
 
         test('_legend should equal empty array', function() {
           expect(element._legend).to.be.deep.equal([]);
-        });
-
-        test('chartTitle should exist', function() {
-          expect(element.chartTitle).to.be.a('String');
-          expect(element.chartTitle).to.be.equal('No Data');
         });
       });
 
@@ -374,11 +352,6 @@ limitations under the License.
 
         test('_legend is correct', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Other']);
-        });
-
-        test('chartTitle should exist', function() {
-          expect(element.chartTitle).to.be.a('String');
-          expect(element.chartTitle).to.equal('Data at Jul 1, 2016');
         });
       });
 
@@ -499,11 +472,6 @@ limitations under the License.
 
         test('_legend is correct', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Other', 'San Antonio, TX, USA']);
-        });
-
-        test('chartTitle should exist', function() {
-          expect(element.chartTitle).to.be.a('String');
-          expect(element.chartTitle).to.equal('Data from Week of Jul 4, 2016 to Week of Jul 25, 2016');
         });
       });
     </script>

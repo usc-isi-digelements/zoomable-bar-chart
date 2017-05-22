@@ -26,14 +26,11 @@ limitations under the License.
     <template is="dom-bind" id="demo">
       <p>An example of <code>&lt;zoomable-bar-chart&gt;</code>:</p>
 
-      <p>{{chartTitle}}</p>
-
       <zoomable-bar-chart timeline
         bar-property="bar"
         stack-property="stack"
         data="[[data]]"
         default-label="Unknown Location"
-        chart-title="{{chartTitle}}"
         loading="[[chartLoading]]"
         selected="[[selected]]">
       </zoomable-bar-chart>

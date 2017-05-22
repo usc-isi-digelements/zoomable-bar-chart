@@ -10,7 +10,6 @@ Example:
         data="[[data]]"
         default-label="Unknown Location"
         height="300"
-        chart-title="{{chartTitle}}"
         loading="[[chartLoading]]"
         selected="[[selected]]">
     </zoomable-bar-chart>
@@ -24,7 +23,7 @@ on the amount of data being displayed:
 Custom property          | Description                                    | Default
 -------------------------|------------------------------------------------|-------------------------
 `--chart-axis-color`     | Color for axis lines and labels                | #727272
-`--chart-text-color`     | Text color for title text                      | --paper-blue-grey-800
+`--chart-text-color`     | Text color for info text                       | --paper-blue-grey-800
 `--chart-color-1`        | Color for first bar in chart (16 colors total) | --paper-blue-500
 `--chart-color-2`        | Second color for bars in chart                 | --paper-orange-500
 `--chart-color-3`        | Third color for bars in chart                  | --paper-green-500
