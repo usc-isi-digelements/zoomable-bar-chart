@@ -297,12 +297,24 @@ Custom property          | Description                                    | Defa
            * Domain values currently selected in the chart. If this chart is a timeline,
            * the start date and end date will be saved in this array as strings.
            * Otherwise, all terms selected will be saved in the array.
+           * Either a list or an object containing a list at its `selectedProperty` property.
            *
-           * @type {Array}
+           * @type {Array|Object}
            */
           selected: {
-            type: Array,
-            notify: true
+            notify: true,
+            type: Object
+          },
+
+          /**
+           * (Optional)
+           *
+           * The property in the `selected` object containing the list of selected dates or string IDs.  If undefined, assumes that `selected` itself is a list.
+           *
+           * @type {String}
+           */
+          selectedProperty: {
+            type: String
           },
 
           /**
@@ -701,41 +713,45 @@ Custom property          | Description                                    | Defa
           // (or clear that property if user clears their selection)
           var onBrushEnd = function() {
             if(!brush.empty() && x.domain().length) {
+              var selectedPath = self.selectedProperty ? ['selected', self.selectedProperty] : 'selected;
               // if this is a timeline, get the start and end values (otherwise, use entire selection)
-              self.set('selected', self.timeline ? [self._formatDateToESString(x.domain()[0]),
+              self.set(selectedPath, self.timeline ? [self._formatDateToESString(x.domain()[0]),
                 self._formatDateToESString(x.domain()[x.domain().length - 1])] : x.domain());
             } else {
-              self.set('selected', []);
+              self.set(selectedPath, []);
             }
           };
 
           brush.on('brushend', onBrushEnd);
 
           // if selected has previously been set and the chart is being resized, manually set brush based on those values
-          if(self.selected && self.selected.length && data) {
-            var extentCalculation;
-            if(self.timeline) {
-              extentCalculation = d3.extent(data.map(function(bar) {
-                if(new Date(self.selected[0]) <= bar.barValue && new Date(self.selected[1]) >= bar.barValue) {
-                  return x(bar.barValue) + x.rangeBand() / 2;
-                }
-              }));
-            } else {
-              extentCalculation = d3.extent(data.map(function(bar) {
-                if(self.selected[0] === bar.barValue ||
-                  self.selected[self.selected.length - 1] === bar.barValue) {
-                  return x(bar.barValue) + x.rangeBand() / 2;
-                }
-              }));
+          if(self.selected) {
+            var selected = self.selectedProperty ? self.selected[self.selectedProperty] : self.selected;
+            if(selected.length && data) {
+              var extentCalculation;
+              if(self.timeline) {
+                extentCalculation = d3.extent(data.map(function(bar) {
+                  if(new Date(selected[0]) <= bar.barValue && new Date(selected[1]) >= bar.barValue) {
+                    return x(bar.barValue) + x.rangeBand() / 2;
+                  }
+                }));
+              } else {
+                extentCalculation = d3.extent(data.map(function(bar) {
+                  if(selected[0] === bar.barValue ||
+                    selected[selected.length - 1] === bar.barValue) {
+                    return x(bar.barValue) + x.rangeBand() / 2;
+                  }
+                }));
+              }
+              // if extent is only one bar, make sure to redraw brush only around that bar
+              if(extentCalculation[0] === extentCalculation[1]) {
+                var singlePercentageOfBarWidth = x.rangeBand() / 100 * 0.01;
+                extentCalculation[0] = extentCalculation[0] - (x.rangeBand() / 2) + singlePercentageOfBarWidth;
+                extentCalculation[1] = extentCalculation[1] + (x.rangeBand() / 2) - singlePercentageOfBarWidth;
+              }
+              brush.extent(extentCalculation);
+              onBrushed();
             }
-            // if extent is only one bar, make sure to redraw brush only around that bar
-            if(extentCalculation[0] === extentCalculation[1]) {
-              var singlePercentageOfBarWidth = x.rangeBand() / 100 * 0.01;
-              extentCalculation[0] = extentCalculation[0] - (x.rangeBand() / 2) + singlePercentageOfBarWidth;
-              extentCalculation[1] = extentCalculation[1] + (x.rangeBand() / 2) - singlePercentageOfBarWidth;
-            }
-            brush.extent(extentCalculation);
-            onBrushed();
           }
 
           overview.append('g')
