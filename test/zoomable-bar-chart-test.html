@@ -50,9 +50,7 @@ limitations under the License.
               count: 2
             }]
           }];
-          flush(function() {
-            done();
-          });
+          flush(done);
         });
 
         test('data should equal array input', function() {
@@ -216,9 +214,7 @@ limitations under the License.
               myCount: 2
             }]
           }];
-          flush(function() {
-            done();
-          });
+          flush(done);
         });
 
         test('data should equal array input', function() {
@@ -270,9 +266,7 @@ limitations under the License.
         setup(function(done) {
           element = fixture('zoomable-bar-chart-fixture');
           element.data = [];
-          flush(function() {
-            done();
-          });
+          flush(done);
         });
 
         test('data should equal empty array', function() {
@@ -293,6 +287,7 @@ limitations under the License.
 
         setup(function(done) {
           element = fixture('zoomable-bar-chart-fixture');
+          element.interval = 'day';
           element.timeline = true;
           element.data = [{
             bar: 'July 01, 2016',
@@ -306,9 +301,7 @@ limitations under the License.
               count: 2
             }]
           }];
-          flush(function() {
-            done();
-          });
+          flush(done);
         });
 
         test('data should equal array input', function() {
@@ -386,9 +379,7 @@ limitations under the License.
               count: 1
             }]
           }];
-          flush(function() {
-            done();
-          });
+          flush(done);
         });
 
         test('data should equal array input', function() {

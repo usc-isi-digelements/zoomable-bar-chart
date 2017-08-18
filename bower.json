@@ -1,7 +1,7 @@
 {
   "name": "zoomable-bar-chart",
   "description": "A Polymer element that creates a bar chart using d3 with the ability to zoom in on specific areas of the data.",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "authors": [
     "Next Century Corporation"
   ],

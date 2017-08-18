@@ -251,14 +251,17 @@ Custom property          | Description                                    | Defa
            * (Required)
            *
            * The time interval for the x-axis. Should be one of the following options:
+           * - 'day'
            * - 'week'
            * - 'month'
            * - 'year'
            *
            * @type {String}
+           * @default 'year'
            */
           interval: {
-            type: String
+            type: String,
+            value: 'year'
           },
 
           /**
@@ -359,19 +362,21 @@ Custom property          | Description                                    | Defa
         },
 
         observers: [
-          '_checkData(data)'
+          '_checkData(data, interval, timeline)'
         ],
 
         /**
          * If data exists, create bar chart.
          *
          * @param {Array} data
+         * @param {String} interval
+         * @param {Boolean} timeline
          * @private
          */
-        _checkData: function(data) {
+        _checkData: function(data, interval, timeline) {
           if(data && data.length) {
-            this._createBars(data);
-            this._createElements();
+            var bars = this._createBars(data, interval, timeline);
+            this._createElements(bars, interval, timeline);
           }
         },
 
@@ -380,10 +385,11 @@ Custom property          | Description                                    | Defa
          * that don't have data.
          *
          * @param {Array} oldBars
+         * @param {String} interval
          * @return {Array} newBars
          * @private
          */
-        _addMissingTimelineBars: function(oldBars) {
+        _addMissingTimelineBars: function(oldBars, interval) {
           var self = this;
           var newBars = [];
 
@@ -394,7 +400,7 @@ Custom property          | Description                                    | Defa
           // Add 0-count bars for all dates on the timeline without data.
           d3.time.scale().domain(d3.extent(oldBars, function(bar) {
             return bar.barValue;
-          })).ticks(self._getD3Interval(self.interval), 1).map(function(tick) {
+          })).ticks(self._getD3Interval(interval), 1).map(function(tick) {
             return {
               object: tick,
               number: tick.getTime()
@@ -407,7 +413,7 @@ Custom property          | Description                                    | Defa
               newBars.push({
                 stacks: [],
                 barValue: tick.object,
-                barLabel: self._getDateText(tick.object, self.interval),
+                barLabel: self._getDateText(tick.object, interval),
                 barCount: 0
               });
             }
@@ -420,9 +426,11 @@ Custom property          | Description                                    | Defa
          * Creates bars for the chart and if applicable, a legend.
          *
          * @param {Array} data
+         * @param {String} interval
+         * @param {Boolean} timeline
          * @private
          */
-        _createBars: function(data) {
+        _createBars: function(data, interval, timeline) {
           var self = this;
           var bars = [];
           var legend = {};
@@ -431,8 +439,8 @@ Custom property          | Description                                    | Defa
             data.forEach(function(bar) {
               var barCount = 0;
               var stacks = [];
-              var barValue = self.timeline ? new Date(bar[self.barProperty]) : bar[self.barProperty];
-              var barLabel = self.timeline ? self._getDateText(barValue, self.interval) : barValue;
+              var barValue = timeline ? new Date(bar[self.barProperty]) : bar[self.barProperty];
+              var barLabel = timeline ? self._getDateText(barValue, interval) : barValue;
               if(bar[self.stackProperty]) {
                 bar[self.stackProperty].forEach(function(stack) {
                   if(stack[self.countProperty]) {
@@ -471,22 +479,25 @@ Custom property          | Description                                    | Defa
               });
             });
 
-            if(this.timeline) {
-              bars = this._addMissingTimelineBars(bars);
+            if(timeline) {
+              bars = this._addMissingTimelineBars(bars, interval);
             }
           }
 
           this._bars = bars;
           this._legend = Object.keys(legend).sort();
+          return bars;
         },
 
         /**
          * Create base elements for the bar chart.
          *
+         * @param {Array} bars
+         * @param {String} interval
+         * @param {Boolean} timeline
          * @private
          */
-        _createElements: function() {
-          var data = this._bars;
+        _createElements: function(bars, interval, timeline) {
           var self = this;
 
           // Use the width of the bar chart container.
@@ -563,12 +574,12 @@ Custom property          | Description                                    | Defa
             .attr('class', 'overview')
             .attr('transform', 'translate(' + marginLeft + ',' + marginTopOverview + ')');
 
-          this._setXAxes(this.timeline, this.interval, data, chartWidth, x, xAxis, xOverview, xAxisOverview);
+          this._setXAxes(timeline, interval, bars, chartWidth, x, xAxis, xOverview, xAxisOverview);
 
-          var xAxisMax = _.max(_.map(data, function(item) {
+          var xAxisMax = _.max(_.map(bars, function(item) {
             return x(item.barValue) + x.rangeBand();
           }));
-          var yAxisMax = d3.max(data, function(d) { return d.barCount; });
+          var yAxisMax = d3.max(bars, function(d) { return d.barCount; });
 
           y.domain([0, yAxisMax]);
           yAxis.tickValues(this._getNumberedAxisTickValues(0, yAxisMax));
@@ -576,8 +587,8 @@ Custom property          | Description                                    | Defa
 
           var createExtentText = function() {
             var xDomain = x.domain();
-            var from = self.timeline ? self._getDateText(new Date(xDomain[0]), self.interval) : xDomain[0];
-            var to = self.timeline ? self._getDateText(new Date(xDomain[xDomain.length - 1]), self.interval) : xDomain[xDomain.length - 1];
+            var from = timeline ? self._getDateText(new Date(xDomain[0]), interval) : xDomain[0];
+            var to = timeline ? self._getDateText(new Date(xDomain[xDomain.length - 1]), interval) : xDomain[xDomain.length - 1];
             if(from === to) {
               return self.source + ' on ' + from;
             }
@@ -626,7 +637,7 @@ Custom property          | Description                                    | Defa
           main.append('g')
             .attr('class', 'bars')
             .selectAll('.bar.stack')
-            .data(data)
+            .data(bars)
             .enter().append('g')
             .attr('class', 'bar stack')
             .attr('transform', function(d) { return 'translate(' + x(d.barValue) + ',0)'; })
@@ -654,7 +665,7 @@ Custom property          | Description                                    | Defa
           overview.append('g')
             .attr('class', 'bars')
             .selectAll('.bar')
-            .data(data)
+            .data(bars)
             .enter().append('rect')
             .attr('class', 'bar')
             .attr('x', function(d) { return xOverview(d.barValue) - 3; })
@@ -668,7 +679,7 @@ Custom property          | Description                                    | Defa
           var onBrushed = function() {
             var extent = brush.extent();
             var xWidth = xOverview.rangeBand();
-            self._setXAxes(self.timeline, self.interval, brush.empty() ? data : data.filter(function(bar) {
+            self._setXAxes(timeline, interval, brush.empty() ? bars : bars.filter(function(bar) {
               var xValue = xOverview(bar.barValue);
               return (extent[0] <= xValue + xWidth) && (xValue <= extent[1]);
             }), chartWidth, x, xAxis);
@@ -715,7 +726,7 @@ Custom property          | Description                                    | Defa
             var selectedPath = self.selectedProperty ? ['selected', self.selectedProperty] : 'selected';
             if(!brush.empty() && x.domain().length) {
               // if this is a timeline, get the start and end values (otherwise, use entire selection)
-              self.set(selectedPath, self.timeline ? [self._formatDateToESString(x.domain()[0]),
+              self.set(selectedPath, timeline ? [self._formatDateToESString(x.domain()[0]),
                 self._formatDateToESString(x.domain()[x.domain().length - 1])] : x.domain());
             } else {
               self.set(selectedPath, []);
@@ -727,16 +738,16 @@ Custom property          | Description                                    | Defa
           // if selected has previously been set and the chart is being resized, manually set brush based on those values
           if(self.selected) {
             var selected = self.selectedProperty ? self.selected[self.selectedProperty] : self.selected;
-            if(selected.length && data) {
+            if(selected.length && bars) {
               var extentCalculation;
-              if(self.timeline) {
-                extentCalculation = d3.extent(data.map(function(bar) {
+              if(timeline) {
+                extentCalculation = d3.extent(bars.map(function(bar) {
                   if(new Date(selected[0]) <= bar.barValue && new Date(selected[1]) >= bar.barValue) {
                     return x(bar.barValue) + x.rangeBand() / 2;
                   }
                 }));
               } else {
-                extentCalculation = d3.extent(data.map(function(bar) {
+                extentCalculation = d3.extent(bars.map(function(bar) {
                   if(selected[0] === bar.barValue ||
                     selected[selected.length - 1] === bar.barValue) {
                     return x(bar.barValue) + x.rangeBand() / 2;
@@ -975,7 +986,7 @@ Custom property          | Description                                    | Defa
          */
         resize: function() {
           d3.select('#chartContainer').style('width', 0);
-          this._createElements();
+          this._createElements(this._bars, this.interval, this.timeline);
         }
       });
     })();
