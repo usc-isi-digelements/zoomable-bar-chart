@@ -23,65 +23,67 @@ limitations under the License.
     <link rel="import" href="../zoomable-bar-chart.html">
   </head>
   <body unresolved>
-    <template is="dom-bind" id="demo">
-      <p>An example of <code>&lt;zoomable-bar-chart&gt;</code>:</p>
+    <dom-bind>
+      <template is="dom-bind" id="demo">
+        <p>An example of <code>&lt;zoomable-bar-chart&gt;</code>:</p>
 
-      <zoomable-bar-chart timeline
-        interval="day"
-        bar-property="bar"
-        stack-property="stack"
-        data="[[data]]"
-        default-label="Unknown Location"
-        loading="[[chartLoading]]"
-        selected="[[selected]]">
-      </zoomable-bar-chart>
-    </template>
-    <script>
-      (function(document) {
-          var demo = document.querySelector('#demo');
-          demo.data = [
-            {
-              bar: 'July 01, 2016',
-              stack: [{
-                label: 'Houston, TX, USA',
-                count: 4
-              }, {
-                label: 'Austin, TX, USA',
-                count: 0
-              }]
-            },{
-              bar: 'July 02, 2016',
-              stack: [{
-                label: 'Houston, TX, USA',
-                count: 8
-              }, {
-                label: 'Austin, TX, USA',
-                count: 2
-              }]
-            },{
-              bar: 'July 03, 2016',
-              stack: [{
-                label: 'Houston, TX, USA',
-                count: 2
-              }, {
-                label: 'Dallas, TX, USA',
-                count: 10
-              }]
-            },{
-              bar: 'July 04, 2016',
-              stack: [{
-                label: 'Dallas, TX, USA',
-                count: 8
-              }, {
-                label: 'Austin, TX, USA',
-                count: 2
-              }, {
-                count: 3
-              }]
-            }            
-          ];
-      })(document);
-    </script>
+        <zoomable-bar-chart timeline
+          interval="day"
+          bar-property="bar"
+          stack-property="stack"
+          data="[[data]]"
+          default-label="Unknown Location"
+          loading="[[chartLoading]]"
+          selected="[[selected]]">
+        </zoomable-bar-chart>
+      </template>
 
+      <script>
+        (function(document) {
+            var demo = document.querySelector('dom-bind');
+            demo.data = [
+              {
+                bar: 'July 01, 2016',
+                stack: [{
+                  label: 'Houston, TX, USA',
+                  count: 4
+                }, {
+                  label: 'Austin, TX, USA',
+                  count: 0
+                }]
+              },{
+                bar: 'July 02, 2016',
+                stack: [{
+                  label: 'Houston, TX, USA',
+                  count: 8
+                }, {
+                  label: 'Austin, TX, USA',
+                  count: 2
+                }]
+              },{
+                bar: 'July 03, 2016',
+                stack: [{
+                  label: 'Houston, TX, USA',
+                  count: 2
+                }, {
+                  label: 'Dallas, TX, USA',
+                  count: 10
+                }]
+              },{
+                bar: 'July 04, 2016',
+                stack: [{
+                  label: 'Dallas, TX, USA',
+                  count: 8
+                }, {
+                  label: 'Austin, TX, USA',
+                  count: 2
+                }, {
+                  count: 3
+                }]
+              }            
+            ];
+        })(document);
+      </script>
+    </dom-bind>
   </body>
 </html>

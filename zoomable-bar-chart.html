@@ -374,6 +374,9 @@ Custom property          | Description                                    | Defa
          * @private
          */
         _checkData: function(data, interval, timeline) {
+          if(!data || !interval || !timeline) {
+            return;
+          }
           if(data && data.length) {
             var bars = this._createBars(data, interval, timeline);
             this._createElements(bars, interval, timeline);
