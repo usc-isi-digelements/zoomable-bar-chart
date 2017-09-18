@@ -15,12 +15,11 @@ limitations under the License.
 -->
 
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../d3-import/d3.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../loading-spinner/loading-spinner.html">
-<link rel="import" href="../moment-element/moment-with-locales-import.html">
-<link rel="import" href="../paper-styles/color.html">
-<link rel="import" href="../d3-import/d3.html">
 <link rel="import" href="../lodash-import/lodash.html">
+<link rel="import" href="../moment-element/moment-with-locales-import.html">
 
 <!--
 A Polymer element that creates a bar chart using d3 with the ability to
@@ -28,44 +27,16 @@ zoom in on specific areas of the data.
 
 ### Example
 ```html
-    <zoomable-bar-chart timeline
-      bar-property="bar"
-      stack-property="stack"
-      data="[[data]]"
-      default-label="Unknown Location"
-      height="300"
-      loading="[[chartLoading]]"
-      selected="[[selected]]">
-    </zoomable-bar-chart>
+<zoomable-bar-chart timeline
+  bar-property="bar"
+  stack-property="stack"
+  data="[[data]]"
+  default-label="Unknown Location"
+  height="300"
+  loading="[[chartLoading]]"
+  selected="[[selected]]">
+</zoomable-bar-chart>
 ```
-
-### Styling
-`<zoomable-bar-chart>` provides custom properties and mixins for styling, most notably allowing customization
-for the colors used for the bars in the bar chart. There can be up to 16 different bar colors total, depending
-on the amount of data being displayed:
-
-Custom property          | Description                                    | Default
--------------------------|------------------------------------------------|--------------------------
-`--chart-axis-color`     | Color for axis lines and labels                | #727272
-`--chart-text-color`     | Text color for info text                       | --paper-blue-grey-800
-`--chart-color-1`        | Color for first bar in chart (16 colors total) | --paper-blue-500
-`--chart-color-2`        | Second color for bars in chart                 | --paper-orange-500
-`--chart-color-3`        | Third color for bars in chart                  | --paper-green-500
-`--chart-color-4`        | Fourth color for bars in chart                 | --paper-red-500
-`--chart-color-5`        | Fifth color for bars in chart                  | --paper-purple-500
-`--chart-color-6`        | Sixth bar color                                | --paper-yellow-500
-`--chart-color-7`        | Seventh bar color                              | --paper-indigo-500
-`--chart-color-8`        | Eighth bar color                               | --paper-cyan-500
-`--chart-color-9`        | Ninth bar color                                | --paper-deep-orange-500
-`--chart-color-10`       | Tenth bar color                                | --paper-lime-500
-`--chart-color-11`       | Eleventh bar color                             | --paper-pink-500
-`--chart-color-12`       | Twelfth bar color                              | --paper-deep-purple-500
-`--chart-color-13`       | Thirteenth bar color                           | --paper-amber-500
-`--chart-color-14`       | Fourteenth bar color                           | --paper-teal-500
-`--chart-color-15`       | Fifteenth bar color                            | --paper-light-green-500
-`--chart-color-16`       | Sixteenth bar color                            | --paper-light-blue-500
-`--chart-other-color`    | Bar color for potential other category         | --paper-grey-500
-`--chart-overview-color` | Color for bars in overview used for zooming    | --paper-blue-grey-900
 
 @demo demo/index.html
 -->
@@ -77,26 +48,6 @@ Custom property          | Description                                    | Defa
     <style>
       :host {
         display: block;
-        --bar-chart-axis-color: var(--chart-axis-color, #727272);
-        --bar-chart-text-color: var(--chart-text-color, --paper-blue-grey-800);
-        --bar-chart-color-1: var(--chart-color-1, --paper-blue-500);
-        --bar-chart-color-2: var(--chart-color-2, --paper-orange-500);
-        --bar-chart-color-3: var(--chart-color-3, --paper-green-500);
-        --bar-chart-color-4: var(--chart-color-4, --paper-red-500);
-        --bar-chart-color-5: var(--chart-color-5, --paper-purple-500);
-        --bar-chart-color-6: var(--chart-color-6, --paper-yellow-500);
-        --bar-chart-color-7: var(--chart-color-7, --paper-indigo-500);
-        --bar-chart-color-8: var(--chart-color-8, --paper-cyan-500);
-        --bar-chart-color-9: var(--chart-color-9, --paper-deep-orange-500);
-        --bar-chart-color-10: var(--chart-color-10, --paper-lime-500);
-        --bar-chart-color-11: var(--chart-color-11, --paper-pink-500);
-        --bar-chart-color-12: var(--chart-color-12, --paper-deep-purple-500);
-        --bar-chart-color-13: var(--chart-color-13, --paper-amber-500);
-        --bar-chart-color-14: var(--chart-color-14, --paper-teal-500);
-        --bar-chart-color-15: var(--chart-color-15, --paper-light-green-500);
-        --bar-chart-color-16: var(--chart-color-16, --paper-light-blue-500);
-        --bar-chart-other-color: var(--chart-other-color, --paper-grey-500);
-        --bar-chart-overview-color: var(--chart-overview-color, --paper-blue-grey-900);
       }
 
       #barChart {
@@ -111,12 +62,12 @@ Custom property          | Description                                    | Defa
 
       .axis {
         font-size: 11px;
-        fill: var(--bar-chart-axis-color);
+        fill: #757575; /* paper-grey-600 */
       }
 
       .axis line, .axis path {
         fill: none;
-        stroke: var(--bar-chart-axis-color);
+        stroke: #757575; /* paper-grey-600 */
         shape-rendering: crispEdges;
       }
 
@@ -520,26 +471,34 @@ Custom property          | Description                                    | Defa
           var chartHeight = this.height - marginTopMain - marginBottomMain;
           var overviewHeight = this.height - marginTopOverview - marginBottomOverview;
 
-          var axisColor = this.getComputedStyleValue('--bar-chart-axis-color');
-          var overviewColor = this.getComputedStyleValue('--bar-chart-overview-color');
-          var otherGroupColor = this.getComputedStyleValue('--bar-chart-other-color');
+          var getComputedStyleValueFunction = function(value) {
+            if(window.ShadyCSS) {
+              return ShadyCSS.getComputedStyleValue(self, value);
+            }
+            return getComputedStyle(self).getPropertyValue(value);
+          };
+
+          var axisColor = '#757575'; /* paper-grey-600 */
+          var textColor = '#424242'; /* paper-grey-800 */
+          var overviewColor = '#424242'; /* paper-grey-800 */
+          var otherGroupColor = '#757575'; /* paper-grey-600 */
           var color = d3.scale.ordinal().range([
-            this.getComputedStyleValue('--bar-chart-color-1'),
-            this.getComputedStyleValue('--bar-chart-color-2'),
-            this.getComputedStyleValue('--bar-chart-color-3'),
-            this.getComputedStyleValue('--bar-chart-color-4'),
-            this.getComputedStyleValue('--bar-chart-color-5'),
-            this.getComputedStyleValue('--bar-chart-color-6'),
-            this.getComputedStyleValue('--bar-chart-color-7'),
-            this.getComputedStyleValue('--bar-chart-color-8'),
-            this.getComputedStyleValue('--bar-chart-color-9'),
-            this.getComputedStyleValue('--bar-chart-color-10'),
-            this.getComputedStyleValue('--bar-chart-color-11'),
-            this.getComputedStyleValue('--bar-chart-color-12'),
-            this.getComputedStyleValue('--bar-chart-color-13'),
-            this.getComputedStyleValue('--bar-chart-color-14'),
-            this.getComputedStyleValue('--bar-chart-color-15'),
-            this.getComputedStyleValue('--bar-chart-color-16')
+              '#1e88e5', /* paper-blue-600 */
+              '#fb8c00', /* paper-orange-600 */
+              '#43a047', /* paper-green-600 */
+              '#e53935', /* paper-red-600 */
+              '#8e24aa', /* paper-purple-600 */
+              '#fdd835', /* paper-yellow-600 */
+              '#3949ab', /* paper-indigo-600 */
+              '#00acc1', /* paper-cyan-600 */
+              '#f4511e', /* paper-deep-orange-600 */
+              '#c0ca33', /* paper-lime-600 */
+              '#d81b60', /* paper-pink-600 */
+              '#5e35b1', /* paper-deep-purple-600 */
+              '#ffb300', /* paper-amber-600 */
+              '#00897b', /* paper-teal-600 */
+              '#7cb342', /* paper-light-green-600 */
+              '#039be5'  /* paper-light-blue-600 */
           ]);
 
           var x = d3.scale.ordinal();
@@ -556,7 +515,7 @@ Custom property          | Description                                    | Defa
           var info = svg.append('text')
             .attr('class', 'info')
             .attr('transform', 'translate(' + marginLeft + ',' + marginTopInfo + ')')
-            .style('fill', this.getComputedStyleValue('--bar-chart-text-color'))
+            .style('fill', textColor)
             .style('font-size', '14px')
             .style('font-weight', 'bold')
             .text('');
@@ -568,7 +527,7 @@ Custom property          | Description                                    | Defa
           svg.append('text')
             .attr('class', 'instructions')
             .attr('transform', 'translate(' + marginLeft + ',' + marginTopInstructions + ')')
-            .style('fill', this.getComputedStyleValue('--bar-chart-text-color'))
+            .style('fill', textColor)
             .style('font-size', '14px')
             .style('font-weight', 'bold')
             .text(self._getSelectionInstructions());
@@ -631,7 +590,7 @@ Custom property          | Description                                    | Defa
               .attr('y2', function(d) { return y(d); })
               .style('fill', 'none')
               .style('shape-rendering', 'crispEdges')
-              .style('stroke', self.getComputedStyleValue('--bar-chart-axis-color'))
+              .style('stroke', axisColor)
               .style('stroke-width', '1px');
           };
 
