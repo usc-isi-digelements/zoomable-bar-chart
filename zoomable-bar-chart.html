@@ -80,7 +80,7 @@ zoom in on specific areas of the data.
 
     <loading-spinner show="[[loading]]" type="Bar Chart"></loading-spinner>
 
-        <svg id="barChart" show$="[[!loading]]"></svg>
+    <svg id="barChart" show$="[[!loading]]"></svg>
   </template>
 
   <script>
@@ -306,6 +306,19 @@ zoom in on specific areas of the data.
             value: function() {
               return [];
             }
+          },
+
+          /**
+           * The unique ID of this bar chart.
+           *
+           * @type {Number}
+           * @private
+           */
+          _uuid: {
+            type: Number,
+            value: function() {
+              return Math.random();
+            }
           }
         },
 
@@ -322,13 +335,17 @@ zoom in on specific areas of the data.
          * @private
          */
         _checkData: function(data, interval, timeline) {
-          if(!data || !interval || !timeline) {
+          if(!data || !data.length || !interval || typeof timeline === 'undefined') {
             return;
           }
-          if(data && data.length) {
-            var bars = this._createBars(data, interval, timeline);
-            this._createElements(bars, interval, timeline);
-          }
+
+          var bars = this._createBars(data, interval, timeline);
+          this._createElements(bars, interval, timeline);
+
+          var self = this;
+          Polymer.RenderStatus.afterNextRender(this, function() {
+            self.resize();
+          });
         },
 
         /**
@@ -743,7 +760,7 @@ zoom in on specific areas of the data.
 
           this.$.barChart.appendChild(svg.node());
 
-          d3.select(window).on('resize', function() {
+          d3.select(window).on('resize.' + this._uuid, function() {
             self.resize();
           });
         },
