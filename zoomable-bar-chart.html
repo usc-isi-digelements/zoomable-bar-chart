@@ -47,7 +47,8 @@ zoom in on specific areas of the data.
 
     <style>
       :host {
-        display: block;
+        @apply --layout-horizontal;
+        @apply --layout-flex-auto;
       }
 
       #barChart {
@@ -79,11 +80,7 @@ zoom in on specific areas of the data.
 
     <loading-spinner show="[[loading]]" type="Bar Chart"></loading-spinner>
 
-    <div class="layout horizontal">
-      <div id="chartContainer" class="flex auto">
         <svg id="barChart" show$="[[!loading]]"></svg>
-      </div>
-    </div>
   </template>
 
   <script>
@@ -455,8 +452,7 @@ zoom in on specific areas of the data.
           var self = this;
 
           // Use the width of the bar chart container.
-          var container = document.getElementById('chartContainer');
-          this.width = (container ? parseInt(container.offsetWidth, 10) : 600);
+          this.width = (this ? parseInt(this.offsetWidth, 10) : 560) || 560;
 
           var marginLeft = 60;
           var marginRight = 20;
@@ -738,14 +734,14 @@ zoom in on specific areas of the data.
             // over the full height of the overview chart
             .attr('height', overviewHeight + 7);  // +7 is magic number for styling
 
-          Polymer.dom(this.$.barChart).setAttribute('style', 'height: ' + this.height + 'px; width: ' + this.width + 'px;');
+          this.$.barChart.setAttribute('style', 'height: ' + this.height + 'px; width: 100%');
 
-          var children = Polymer.dom(this.$.barChart).children;
+          var children = this.$.barChart.children;
           for(var i = 0; i < children.length; i++) {
-            Polymer.dom(this.$.barChart).removeChild(children[i]);
+            this.$.barChart.removeChild(children[i]);
           }
 
-          Polymer.dom(this.$.barChart).appendChild(svg.node());
+          this.$.barChart.appendChild(svg.node());
 
           d3.select(window).on('resize', function() {
             self.resize();
@@ -937,9 +933,9 @@ zoom in on specific areas of the data.
          */
         _getSelectionInstructions: function() {
           if(this.displayFilterText) {
-            return 'Click and drag on the chart below to zoom and select a range filter.  Click elsewhere to reset.';
+            return 'Click & drag on the chart below to zoom & filter.  Click elsewhere to reset.';
           } else {
-            return 'Click and drag on the chart below to zoom.  Click elsewhere to reset the zoom.';
+            return 'Click & drag on the chart below to zoom.  Click elsewhere to reset the zoom.';
           }
         },
 
@@ -947,7 +943,6 @@ zoom in on specific areas of the data.
          * Recreate elements when window is resized.
          */
         resize: function() {
-          d3.select('#chartContainer').style('width', 0);
           this._createElements(this._bars, this.interval, this.timeline);
         }
       });
