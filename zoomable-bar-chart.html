@@ -28,6 +28,7 @@ zoom in on specific areas of the data.
 ### Example
 ```html
 <zoomable-bar-chart timeline
+  load
   bar-property="bar"
   stack-property="stack"
   data="[[data]]"
@@ -283,6 +284,19 @@ zoom in on specific areas of the data.
           },
 
           /**
+           * (Optional)
+           *
+           * Whether to load the bar chart data.
+           *
+           * @type {Boolean}
+           * @default false
+           */
+          load: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
            * The data that is displayed in the bar chart.  Computed from the data.
            *
            * @default []
@@ -323,7 +337,7 @@ zoom in on specific areas of the data.
         },
 
         observers: [
-          '_checkData(data, interval, timeline)'
+          '_checkData(data, interval, load, timeline)'
         ],
 
         /**
@@ -331,11 +345,17 @@ zoom in on specific areas of the data.
          *
          * @param {Array} data
          * @param {String} interval
+         * @param {Boolean} load
          * @param {Boolean} timeline
          * @private
          */
-        _checkData: function(data, interval, timeline) {
-          if(!data || !data.length || !interval || typeof timeline === 'undefined') {
+        _checkData: function(data, interval, load, timeline) {
+          if(!data || !data.length || !interval || !load || typeof timeline === 'undefined') {
+            var children = this.$.barChart.children;
+            for(var i = 0; i < children.length; i++) {
+              this.$.barChart.removeChild(children[i]);
+            }
+            this.$.barChart.removeAttribute('style');
             return;
           }
 

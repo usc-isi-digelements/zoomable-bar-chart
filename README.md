@@ -5,6 +5,7 @@ that selection for use as a filter.
 Example:
 ```html
 <zoomable-bar-chart timeline
+  load
   bar-property="bar"
   stack-property="stack"
   data="[[data]]"

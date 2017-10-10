@@ -38,6 +38,7 @@ limitations under the License.
 
         setup(function(done) {
           element = fixture('zoomable-bar-chart-fixture');
+          element.load = true;
           element.data = [{
             bar: 'July 01, 2016',
             stack: [{
@@ -94,6 +95,10 @@ limitations under the License.
 
         test('_legend is correct', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Other']);
+        });
+
+        test('svg is not empty', function() {
+          expect(element.$$('svg').innerHTML).to.not.equal('');
         });
 
         test('displayFilterText is correct', function() {
@@ -197,6 +202,7 @@ limitations under the License.
 
         setup(function(done) {
           element = fixture('zoomable-bar-chart-fixture');
+          element.load = true;
           element.barProperty = 'myGroup';
           element.stackProperty = 'myArray';
           element.labelProperty = 'myLabel';
@@ -259,26 +265,9 @@ limitations under the License.
         test('_legend is correct', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Thing']);
         });
-      });
 
-      suite('<zoomable-bar-chart> with no data', function() {
-        var element;
-        setup(function(done) {
-          element = fixture('zoomable-bar-chart-fixture');
-          element.data = [];
-          flush(done);
-        });
-
-        test('data should equal empty array', function() {
-          expect(element.data).to.be.deep.equal([]);
-        });
-
-        test('_bars should equal empty array', function() {
-          expect(element._bars).to.be.deep.equal([]);
-        });
-
-        test('_legend should equal empty array', function() {
-          expect(element._legend).to.be.deep.equal([]);
+        test('svg is not empty', function() {
+          expect(element.$$('svg').innerHTML).to.not.equal('');
         });
       });
 
@@ -287,6 +276,7 @@ limitations under the License.
 
         setup(function(done) {
           element = fixture('zoomable-bar-chart-fixture');
+          element.load = true;
           element.interval = 'day';
           element.timeline = true;
           element.data = [{
@@ -346,6 +336,10 @@ limitations under the License.
         test('_legend is correct', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Other']);
         });
+
+        test('svg is not empty', function() {
+          expect(element.$$('svg').innerHTML).to.not.equal('');
+        });
       });
 
       suite('<zoomable-bar-chart> with weekly timeline data', function() {
@@ -353,6 +347,7 @@ limitations under the License.
 
         setup(function(done) {
           element = fixture('zoomable-bar-chart-fixture');
+          element.load = true;
           element.timeline = true;
           element.interval = 'week';
           element.data = [{
@@ -463,6 +458,84 @@ limitations under the License.
 
         test('_legend is correct', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Other', 'San Antonio, TX, USA']);
+        });
+
+        test('svg is not empty', function() {
+          expect(element.$$('svg').innerHTML).to.not.equal('');
+        });
+      });
+
+      suite('<zoomable-bar-chart> with no data', function() {
+        var element;
+        setup(function(done) {
+          element = fixture('zoomable-bar-chart-fixture');
+          element.load = true;
+          element.data = [];
+          flush(done);
+        });
+
+        test('data should equal empty array', function() {
+          expect(element.data).to.be.deep.equal([]);
+        });
+
+        test('_bars should equal empty array', function() {
+          expect(element._bars).to.be.deep.equal([]);
+        });
+
+        test('_legend should equal empty array', function() {
+          expect(element._legend).to.be.deep.equal([]);
+        });
+
+        test('svg is empty', function() {
+          expect(element.$$('svg').innerHTML).to.equal('');
+        });
+      });
+
+      suite('<zoomable-bar-chart> with load=false', function() {
+        var element;
+
+        setup(function(done) {
+          element = fixture('zoomable-bar-chart-fixture');
+          element.data = [{
+            bar: 'July 01, 2016',
+            stack: [{
+              label: 'Houston, TX, USA',
+              count: 4
+            }, {
+              label: 'Austin, TX, USA',
+              count: 0
+            }, {
+              count: 2
+            }]
+          }];
+          flush(done);
+        });
+
+        test('data should equal array input', function() {
+          expect(element.data).to.be.deep.equal([{
+            bar: 'July 01, 2016',
+            stack: [{
+              label: 'Houston, TX, USA',
+              count: 4
+            }, {
+              label: 'Austin, TX, USA',
+              count: 0
+            }, {
+              count: 2
+            }]
+          }]);
+        });
+
+        test('_bars should equal empty array', function() {
+          expect(element._bars).to.be.deep.equal([]);
+        });
+
+        test('_legend should equal empty array', function() {
+          expect(element._legend).to.be.deep.equal([]);
+        });
+
+        test('svg is empty', function() {
+          expect(element.$$('svg').innerHTML).to.equal('');
         });
       });
     </script>
