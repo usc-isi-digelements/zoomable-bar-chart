@@ -64,12 +64,12 @@ zoom in on specific areas of the data.
 
       .axis {
         font-size: 11px;
-        fill: #757575; /* paper-grey-600 */
+        fill: #424242; /* paper-grey-800 */
       }
 
       .axis line, .axis path {
         fill: none;
-        stroke: #757575; /* paper-grey-600 */
+        stroke: #424242; /* paper-grey-600 */
         shape-rendering: crispEdges;
       }
 
@@ -147,7 +147,20 @@ zoom in on specific areas of the data.
           /**
            * (Optional)
            *
-           * The name to give to bars that do not have a name.
+           * The color given to bars that do not have labels.
+           *
+           * @type {String}
+           * @default '#757575'
+           */
+          defaultColor: {
+            type: String,
+            value: '#757575' /* paper-grey-600 */
+          },
+
+          /**
+           * (Optional)
+           *
+           * The label given to bars that do not have labels.
            *
            * @type {String}
            * @default 'Other'
@@ -511,10 +524,7 @@ zoom in on specific areas of the data.
             return getComputedStyle(self).getPropertyValue(value);
           };
 
-          var axisColor = '#757575'; /* paper-grey-600 */
-          var textColor = '#424242'; /* paper-grey-800 */
-          var overviewColor = '#424242'; /* paper-grey-800 */
-          var otherGroupColor = '#757575'; /* paper-grey-600 */
+          var defaultColor = this.defaultColor;
           var color = d3.scale.ordinal().range([
               '#1e88e5', /* paper-blue-600 */
               '#fb8c00', /* paper-orange-600 */
@@ -548,9 +558,9 @@ zoom in on specific areas of the data.
           var info = svg.append('text')
             .attr('class', 'info')
             .attr('transform', 'translate(' + marginLeft + ',' + marginTopInfo + ')')
-            .style('fill', textColor)
+            .style('fill', '#424242')
             .style('font-size', '14px')
-            .style('font-weight', 'bold')
+            .style('font-weight', '500')
             .text('');
 
           var main = svg.append('g')
@@ -560,9 +570,9 @@ zoom in on specific areas of the data.
           svg.append('text')
             .attr('class', 'instructions')
             .attr('transform', 'translate(' + marginLeft + ',' + marginTopInstructions + ')')
-            .style('fill', textColor)
+            .style('fill', '#424242')
             .style('font-size', '14px')
-            .style('font-weight', 'bold')
+            .style('font-weight', '500')
             .text(self._getSelectionInstructions());
 
           var overview = svg.append('g')
@@ -623,7 +633,7 @@ zoom in on specific areas of the data.
               .attr('y2', function(d) { return y(d); })
               .style('fill', 'none')
               .style('shape-rendering', 'crispEdges')
-              .style('stroke', axisColor)
+              .style('stroke', '#424242')
               .style('stroke-width', '1px');
           };
 
@@ -643,9 +653,11 @@ zoom in on specific areas of the data.
             .attr('width', function() { return Math.max(x.rangeBand(), 8); })
             .attr('y', function(d) { return y(d.stackEnd); })
             .attr('height', function(d) { return y(d.stackStart) - y(d.stackEnd); })
+            .style('stroke', '#111')
+            .style('stroke-width', '1px')
             .style('fill', function(d) {
               if(d.stackLabel === self.defaultLabel || !color(d.stackLabel)) {
-                return otherGroupColor;
+                return defaultColor;
               }
               return color(d.stackLabel);
             })
@@ -654,7 +666,10 @@ zoom in on specific areas of the data.
               info.text(createExtentText());
             })
             .on('mousemove', function(d) {
-              info.text(d.barLabel + ':  ' + (d.stackLabel ? (d.stackLabel + ' ') : '') + '(' + (d.stackEnd - d.stackStart) + ' of ' + d.barCount + ')');
+              // Add commas to pretty format numbers.
+              var barLabel = d.barCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+              var stackLabel = (d.stackEnd - d.stackStart).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+              info.text(d.barLabel + ':  ' + (d.stackLabel ? (d.stackLabel + ' ') : '') + '(' + stackLabel + ' of ' + barLabel + ')');
             });
 
           overview.append('g')
@@ -667,7 +682,9 @@ zoom in on specific areas of the data.
             .attr('width', function() { return Math.max(xOverview.rangeBand(), 8); })
             .attr('y', function(d) { return yOverview(d.barCount); })
             .attr('height', function(d) { return overviewHeight - yOverview(d.barCount); })
-            .style('fill', overviewColor);
+            .style('stroke', '#111')
+            .style('stroke-width', '1px')
+            .style('fill', '#424242');
 
           var brush = d3.svg.brush().x(xOverview);
 
@@ -703,7 +720,7 @@ zoom in on specific areas of the data.
             main.select('.y.axis').call(yAxis);
 
             // For whatever reason (maybe polymer?) the stroke color of the ticks isn't correctly applied once the axes are redrawn so we must reapply it here.
-            main.selectAll('.axis .tick line').attr('stroke', axisColor);
+            main.selectAll('.axis .tick line').attr('stroke', '#424242');
 
             main.selectAll('.bar.stack rect')
               .attr('y', function(d) { return y(d.stackEnd); })
@@ -970,9 +987,9 @@ zoom in on specific areas of the data.
          */
         _getSelectionInstructions: function() {
           if(this.displayFilterText) {
-            return 'Click & drag on the chart below to zoom & filter.  Click elsewhere to reset.';
+            return 'Click + drag on the chart below to zoom + filter.  Click elsewhere to reset.';
           } else {
-            return 'Click & drag on the chart below to zoom.  Click elsewhere to reset the zoom.';
+            return 'Click + drag on the chart below to zoom.  Click elsewhere to reset the zoom.';
           }
         },
 

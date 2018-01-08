@@ -189,11 +189,11 @@ limitations under the License.
         });
 
         test('_getSelectionInstructions returns correct results', function() {
-          expect(element._getSelectionInstructions()).to.equal('Click & drag on the chart below to zoom.  Click elsewhere to reset the zoom.');
+          expect(element._getSelectionInstructions()).to.equal('Click + drag on the chart below to zoom.  Click elsewhere to reset the zoom.');
 
           element.displayFilterText = true;
 
-          expect(element._getSelectionInstructions()).to.equal('Click & drag on the chart below to zoom & filter.  Click elsewhere to reset.');
+          expect(element._getSelectionInstructions()).to.equal('Click + drag on the chart below to zoom + filter.  Click elsewhere to reset.');
         });
       });
 
