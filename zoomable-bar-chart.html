@@ -63,13 +63,13 @@ zoom in on specific areas of the data.
       }
 
       .axis {
-        font-size: 11px;
-        fill: #424242; /* paper-grey-800 */
+        font-size: 12px;
+        fill: #212121; /* paper-grey-900 */
       }
 
       .axis line, .axis path {
         fill: none;
-        stroke: #424242; /* paper-grey-600 */
+        stroke: #212121; /* paper-grey-900 */
         shape-rendering: crispEdges;
       }
 
@@ -186,6 +186,45 @@ zoom in on specific areas of the data.
           /**
            * (Optional)
            *
+           * Whether to hide the bar chart axes and grid.
+           *
+           * @type {Boolean}
+           * @default false
+           */
+          hideAxes: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * (Optional)
+           *
+           * Whether to hide the bar chart grid.
+           *
+           * @type {Boolean}
+           * @default false
+           */
+          hideGrid: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * (Optional)
+           *
+           * Whether to hide the bar chart overview.
+           *
+           * @type {Boolean}
+           * @default false
+           */
+          hideOverview: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * (Optional)
+           *
            * The source of the data to use in the info text for this bar chart.
            *
            * @type {String}
@@ -213,6 +252,7 @@ zoom in on specific areas of the data.
            * (Required)
            *
            * The time interval for the x-axis. Should be one of the following options:
+           * - 'hour'
            * - 'day'
            * - 'week'
            * - 'month'
@@ -504,12 +544,12 @@ zoom in on specific areas of the data.
           // Use the width of the bar chart container.
           this.width = (this ? parseInt(this.offsetWidth, 10) : 560) || 560;
 
-          var marginLeft = 60;
-          var marginRight = 20;
-          var marginTopInfo = 20;
-          var marginTopMain = 40;
-          var marginBottomMain = 130;
-          var marginTopInstructions = this.height - 80;
+          var marginLeft = 50;
+          var marginRight = 10;
+          var marginTopInfo = 15;
+          var marginTopMain = 25;
+          var marginBottomMain = this.hideOverview ? 20 : 110;
+          var marginTopInstructions = this.height - 70;
           var marginTopOverview = this.height - 60;
           var marginBottomOverview = 20;
 
@@ -548,17 +588,34 @@ zoom in on specific areas of the data.
           var y = d3.scale.linear().range([chartHeight, 0]);
           var xOverview = d3.scale.ordinal();
           var yOverview = d3.scale.linear().range([overviewHeight, 0]);
+          var xAxis, yAxis, xAxisOverview;
 
-          var xAxis = d3.svg.axis().scale(x).orient('bottom');
-          var yAxis = d3.svg.axis().scale(y).orient('left').tickFormat(d3.format('.0f'));
-          var xAxisOverview = d3.svg.axis().scale(xOverview).orient('bottom');
+          if(!this.hideAxes) {
+            xAxis = d3.svg.axis().scale(x).orient('bottom');
+            yAxis = d3.svg.axis().scale(y).orient('left').tickFormat(function(tick) {
+              if(tick >= 1000000000000) {
+                return ('' + tick).substring(0, ('' + tick).length - 12) + ' T';
+              }
+              if(tick >= 1000000000) {
+                return ('' + tick).substring(0, ('' + tick).length - 9) + ' B';
+              }
+              if(tick >= 1000000) {
+                return ('' + tick).substring(0, ('' + tick).length - 6) + ' M';
+              }
+              if(tick >= 1000) {
+                return ('' + tick).substring(0, ('' + tick).length - 3) + ' K';
+              }
+              return '' + tick;
+            });
+            xAxisOverview = d3.svg.axis().scale(xOverview).orient('bottom');
+          }
 
           var svg = d3.select(document.createElement('div')).append('svg');
 
           var info = svg.append('text')
             .attr('class', 'info')
             .attr('transform', 'translate(' + marginLeft + ',' + marginTopInfo + ')')
-            .style('fill', '#424242')
+            .style('fill', '#212121')
             .style('font-size', '14px')
             .style('font-weight', '500')
             .text('');
@@ -567,27 +624,36 @@ zoom in on specific areas of the data.
             .attr('class', 'main')
             .attr('transform', 'translate(' + marginLeft + ',' + marginTopMain + ')');
 
-          svg.append('text')
-            .attr('class', 'instructions')
-            .attr('transform', 'translate(' + marginLeft + ',' + marginTopInstructions + ')')
-            .style('fill', '#424242')
-            .style('font-size', '14px')
-            .style('font-weight', '500')
-            .text(self._getSelectionInstructions());
+          var overview;
 
-          var overview = svg.append('g')
-            .attr('class', 'overview')
-            .attr('transform', 'translate(' + marginLeft + ',' + marginTopOverview + ')');
+          if(!this.hideOverview) {
+            svg.append('text')
+              .attr('class', 'instructions')
+              .attr('transform', 'translate(' + marginLeft + ',' + marginTopInstructions + ')')
+              .style('fill', '#212121')
+              .style('font-size', '14px')
+              .style('font-weight', '500')
+              .text(self._getSelectionInstructions());
 
-          this._setXAxes(timeline, interval, bars, chartWidth, x, xAxis, xOverview, xAxisOverview);
+            overview = svg.append('g')
+              .attr('class', 'overview')
+              .attr('transform', 'translate(' + marginLeft + ',' + marginTopOverview + ')');
+          }
+
+          this._setXAxis(timeline, interval, bars, chartWidth, x, xAxis, xOverview, xAxisOverview, this.hideAxes);
 
           var xAxisMax = _.max(_.map(bars, function(item) {
             return x(item.barValue) + x.rangeBand();
           }));
           var yAxisMax = d3.max(bars, function(d) { return d.barCount; });
-
+          var ticks = this._getNumberedAxisTickValues(0, yAxisMax, chartHeight);
+          yAxisMax = ticks[ticks.length - 1];
           y.domain([0, yAxisMax]);
-          yAxis.tickValues(this._getNumberedAxisTickValues(0, yAxisMax));
+
+          if(!this.hideAxes) {
+            yAxis.tickValues(ticks);
+          }
+
           yOverview.domain(y.domain());
 
           var createExtentText = function() {
@@ -606,38 +672,46 @@ zoom in on specific areas of the data.
             return key !== self.defaultLabel;
           }));
 
-          main.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', 'translate(0,' + chartHeight + ')')
-            .call(xAxis);
-          main.append('g')
-            .attr('class', 'y axis')
-            .call(yAxis);
-          overview.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', 'translate(0,' + overviewHeight + ')')
-            .call(xAxisOverview);
+          if(!this.hideAxes) {
+            main.append('g')
+              .attr('class', 'x axis')
+              .attr('transform', 'translate(0,' + chartHeight + ')')
+              .call(xAxis);
+            main.append('g')
+              .attr('class', 'y axis')
+              .call(yAxis);
 
-          var grid = main.append('g').attr('class', 'grid');
+            if(!this.hideOverview) {
+              overview.append('g')
+                .attr('class', 'x axis')
+                .attr('transform', 'translate(0,' + overviewHeight + ')')
+                .call(xAxisOverview);
+            }
+          }
 
-          var createGridLines = function(yAxisMax) {
-            grid.selectAll('line.gridline').remove();
-            grid.selectAll('line.gridline')
-              .data(self._getNumberedAxisTickValues(0, yAxisMax))
-              .enter()
-              .append('line')
-              .attr('class', 'gridline')
-              .attr('x1', 0)
-              .attr('x2', xAxisMax)
-              .attr('y1', function(d) { return y(d); })
-              .attr('y2', function(d) { return y(d); })
-              .style('fill', 'none')
-              .style('shape-rendering', 'crispEdges')
-              .style('stroke', '#424242')
-              .style('stroke-width', '1px');
-          };
+          var grid, createGridLines;
+          if(!this.hideAxes && !this.hideGrid) {
+            grid = main.append('g').attr('class', 'grid');
 
-          createGridLines(yAxisMax);
+            createGridLines = function(yAxisMax) {
+              grid.selectAll('line.gridline').remove();
+              grid.selectAll('line.gridline')
+                .data(self._getNumberedAxisTickValues(0, yAxisMax, chartHeight))
+                .enter()
+                .append('line')
+                .attr('class', 'gridline')
+                .attr('x1', 0)
+                .attr('x2', xAxisMax)
+                .attr('y1', function(d) { return y(d); })
+                .attr('y2', function(d) { return y(d); })
+                .style('fill', 'none')
+                .style('shape-rendering', 'crispEdges')
+                .style('stroke', '#757575')
+                .style('stroke-width', '1px');
+            };
+
+            createGridLines(yAxisMax);
+          }
 
           main.append('g')
             .attr('class', 'bars')
@@ -653,7 +727,7 @@ zoom in on specific areas of the data.
             .attr('width', function() { return Math.max(x.rangeBand(), 8); })
             .attr('y', function(d) { return y(d.stackEnd); })
             .attr('height', function(d) { return y(d.stackStart) - y(d.stackEnd); })
-            .style('stroke', '#111')
+            .style('stroke', '#212121')
             .style('stroke-width', '1px')
             .style('fill', function(d) {
               if(d.stackLabel === self.defaultLabel || !color(d.stackLabel)) {
@@ -661,7 +735,6 @@ zoom in on specific areas of the data.
               }
               return color(d.stackLabel);
             })
-            .style('cursor', 'pointer')
             .on('mouseout', function() {
               info.text(createExtentText());
             })
@@ -672,29 +745,32 @@ zoom in on specific areas of the data.
               info.text(d.barLabel + ':  ' + (d.stackLabel ? (d.stackLabel + ' ') : '') + '(' + stackLabel + ' of ' + barLabel + ')');
             });
 
-          overview.append('g')
-            .attr('class', 'bars')
-            .selectAll('.bar')
-            .data(bars)
-            .enter().append('rect')
-            .attr('class', 'bar')
-            .attr('x', function(d) { return xOverview(d.barValue) - 3; })
-            .attr('width', function() { return Math.max(xOverview.rangeBand(), 8); })
-            .attr('y', function(d) { return yOverview(d.barCount); })
-            .attr('height', function(d) { return overviewHeight - yOverview(d.barCount); })
-            .style('stroke', '#111')
-            .style('stroke-width', '1px')
-            .style('fill', '#424242');
+          if(!this.hideOverview) {
+            overview.append('g')
+              .attr('class', 'bars')
+              .selectAll('.bar')
+              .data(bars)
+              .enter().append('rect')
+              .attr('class', 'bar')
+              .attr('x', function(d) { return xOverview(d.barValue) - 3; })
+              .attr('width', function() { return Math.max(xOverview.rangeBand(), 8); })
+              .attr('y', function(d) { return yOverview(d.barCount); })
+              .attr('height', function(d) { return overviewHeight - yOverview(d.barCount); })
+              .style('stroke', '#212121')
+              .style('stroke-width', '1px')
+              .style('fill', '#212121');
+          }
 
           var brush = d3.svg.brush().x(xOverview);
 
           var onBrushed = function() {
             var extent = brush.extent();
             var xWidth = xOverview.rangeBand();
-            self._setXAxes(timeline, interval, brush.empty() ? bars : bars.filter(function(bar) {
+
+            self._setXAxis(timeline, interval, brush.empty() ? bars : bars.filter(function(bar) {
               var xValue = xOverview(bar.barValue);
               return (extent[0] <= xValue + xWidth) && (xValue <= extent[1]);
-            }), chartWidth, x, xAxis);
+            }), chartWidth, x, xAxis, self.hideAxes);
 
             main.selectAll('.bar.stack .bar').attr('width', function() { return Math.max(x.rangeBand(), 8); });
 
@@ -713,21 +789,28 @@ zoom in on specific areas of the data.
                 }
               });
 
+            var ticks = self._getNumberedAxisTickValues(0, yAxisMax, chartHeight);
+            yAxisMax = ticks[ticks.length - 1];
             y.domain([0, yAxisMax]);
-            yAxis.tickValues(self._getNumberedAxisTickValues(0, yAxisMax));
 
-            main.select('.x.axis').call(xAxis);
-            main.select('.y.axis').call(yAxis);
+            if(!this.hideAxes) {
+              yAxis.tickValues(ticks);
 
-            // For whatever reason (maybe polymer?) the stroke color of the ticks isn't correctly applied once the axes are redrawn so we must reapply it here.
-            main.selectAll('.axis .tick line').attr('stroke', '#424242');
+              main.select('.x.axis').call(xAxis);
+              main.select('.y.axis').call(yAxis);
+
+              // For whatever reason (polymer?) the stroke color of the ticks isn't correctly applied once the axes are redrawn so we must reapply it here.
+              main.selectAll('.axis .tick line').attr('stroke', '#212121');
+            }
 
             main.selectAll('.bar.stack rect')
               .attr('y', function(d) { return y(d.stackEnd); })
               .attr('height', function(d) { return y(d.stackStart) - y(d.stackEnd); });
 
-            grid.selectAll('line.gridline').remove();
-            createGridLines(yAxisMax);
+            if(!this.hideAxes && !this.hideGrid) {
+              grid.selectAll('line.gridline').remove();
+              createGridLines(yAxisMax);
+            }
           };
 
           brush.on('brush', onBrushed);
@@ -777,16 +860,18 @@ zoom in on specific areas of the data.
             }
           }
 
-          overview.append('g')
-            .attr('class', 'x brush')
-            .call(brush)
-            .selectAll('rect')
-            // -6 is magic number to offset positions for styling/interaction to feel right
-            .attr('y', -6)
-            // need to manually set the height because the brush has
-            // no y scale, i.e. we should see the extent being marked
-            // over the full height of the overview chart
-            .attr('height', overviewHeight + 7);  // +7 is magic number for styling
+          if(!this.hideOverview) {
+            overview.append('g')
+              .attr('class', 'x brush')
+              .call(brush)
+              .selectAll('rect')
+              // -6 is magic number to offset positions for styling/interaction to feel right
+              .attr('y', -6)
+              // need to manually set the height because the brush has
+              // no y scale, i.e. we should see the extent being marked
+              // over the full height of the overview chart
+              .attr('height', overviewHeight + 7);  // +7 is magic number for styling
+          }
 
           this.$.barChart.setAttribute('style', 'height: ' + this.height + 'px; width: 100%');
 
@@ -810,6 +895,12 @@ zoom in on specific areas of the data.
          * @private
          */
         _getD3Interval: function(interval) {
+          if(interval === 'hour') {
+            return d3.time.hour;
+          }
+          if(interval === 'day') {
+            return d3.time.day;
+          }
           if(interval === 'week') {
             // Use d3.time.monday for weeks because elasticsearch date histogram aggregations return weeks that start on Mondays.
             return d3.time.monday;
@@ -817,10 +908,7 @@ zoom in on specific areas of the data.
           if(interval === 'month') {
             return d3.time.month;
           }
-          if(interval === 'year') {
-            return d3.time.year;
-          }
-          return d3.time.day;
+          return d3.time.year;
         },
 
         /**
@@ -841,7 +929,7 @@ zoom in on specific areas of the data.
           if(interval === 'year') {
             return 'Year of ' + moment.utc(date).format('YYYY');
           }
-          return moment.utc(date).format('MMM D, YYYY');
+          return interval === 'day' ? moment.utc(date).format('MMM D, YYYY') : moment.utc(date).format('HH:mm:ss MMM D, YYYY');
         },
 
         /**
@@ -904,27 +992,68 @@ zoom in on specific areas of the data.
         /**
          * Returns tick values for the y-axis.
          *
-         * @param {Number} axisMin
-         * @param {Number} axisMax
+         * @param {Number} barMin
+         * @param {Number} barMax
+         * @param {Number} height
          * @return {Array} tick values
          * @private
          */
-        _getNumberedAxisTickValues: function(axisMin, axisMax) {
-          if(axisMax - axisMin < 10) {
-            return _.range(axisMin, axisMax + 1);
+        _getNumberedAxisTickValues: function(barMin, barMax, height) {
+          // One tick plus one per 20 px in height.  Return at most 11 tick values.  EX:  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          var valueCount = Math.min(11, Math.floor(height / 20.0) + 1);
+          if(valueCount < 3) {
+            return [barMin, barMax];
           }
-          // Return at most 10 tick values based on the number of digits in the maximum.
-          var string = (axisMax - axisMin).toString();
-          var digits = string.length;
-          var step = Math.pow(10, digits - 1);
-          if(string.indexOf('1') === 0) {
-            step = 2 * Math.pow(10, digits - 2);
+
+          var difference = Math.ceil(barMax - barMin);
+          if(difference < valueCount) {
+            // Always set the end of the range to the max plus one so the max is added to the range if it is evenly divisible.
+            return _.range(barMin, barMax + 1);
           }
-          if(string.indexOf('2') === 0 || string.indexOf('3') === 0 || string.indexOf('4') === 0) {
-            step = 5 * Math.pow(10, digits - 2);
+
+          if(valueCount === 3) {
+            var middle = Math.ceil(difference / 2.0);
+            // Use the middle rather than the barMax here so the middle number is evenly spaced between the min and max.  This may add 1 to the max.
+            return [barMin, (barMin + middle), (barMin + 2 * middle)];
           }
-          // Set the end to the max plus one so the max is added to the range if evenly divisible.
-          return _.range(axisMin, axisMax + 1, step);
+
+          var text = difference.toString();
+          var size = text.length;
+          var step = Math.pow(10, size - 1);
+          var timesTwo = false;
+
+          // Increase the step if able due to the difference.
+          if(size > 1) {
+            if(difference === step) {
+              // EX:  difference = 100
+              step = Math.pow(10, size - 2);
+            } else if((_.startsWith(text, '1') && difference !== step) || (_.startsWith(text, '2') && difference === 2 * step)) {
+              // EX:  difference = 123 OR 200
+              step = 2 * Math.pow(10, size - 2);
+              timesTwo = true;
+            } else if(_.startsWith(text, '2') || _.startsWith(text, '3') || _.startsWith(text, '4') || (_.startsWith(text, '5') && difference === 5 * step)) {
+              // EX:  difference = 234 OR 345 OR 456 OR 500
+              step = 5 * Math.pow(10, size - 2);
+            }
+          }
+
+          var values = _.range((Math.floor(barMin / step) * step), (Math.ceil(barMax / step) * step) + 1, step);
+
+          // Increase the step if needed due to the valueCount.
+          if(values.length > valueCount && !timesTwo) {
+            step = 2 * step;
+            values = _.range((Math.floor(barMin / step) * step), (Math.ceil(barMax / step) * step) + 1, step);
+          }
+          if(values.length > valueCount) {
+            step = (step / 2) * 5;
+            values = _.range((Math.floor(barMin / step) * step), (Math.ceil(barMax / step) * step) + 1, step);
+          }
+          if(values.length > valueCount && timesTwo) {
+            step = Math.pow(10, size - 1);
+            values = _.range((Math.floor(barMin / step) * step), (Math.ceil(barMax / step) * step) + 1, step);
+          }
+
+          return values;
         },
 
         /**
@@ -955,27 +1084,30 @@ zoom in on specific areas of the data.
          * @param {Object} xAxis
          * @param {Object} xOverview
          * @param {Object} xAxisOverview
+         * @param {Boolean} hideAxes
          * @private
          */
-        _setXAxes: function(timeline, interval, data, chartWidth, x, xAxis, xOverview, xAxisOverview) {
+        _setXAxis: function(timeline, interval, data, chartWidth, x, xAxis, xOverview, xAxisOverview, hideAxes) {
           var xDomain = this._getDomain(data, timeline, interval, chartWidth);
           x.domain(xDomain).rangeBands([0, chartWidth]);
           if(xOverview) {
             xOverview.domain(x.domain()).rangeBands([0, chartWidth]);
           }
 
-          if(timeline) {
-            var timeFormat = this._getDomainTimeFormat(xDomain, interval);
-            xAxis.tickFormat(d3.time.format(timeFormat));
-            if(xAxisOverview) {
-              xAxisOverview.tickFormat(d3.time.format(timeFormat));
+          if(!hideAxes) {
+            if(timeline) {
+              var timeFormat = this._getDomainTimeFormat(xDomain, interval);
+              xAxis.tickFormat(d3.time.format(timeFormat));
+              if(xAxisOverview) {
+                xAxisOverview.tickFormat(d3.time.format(timeFormat));
+              }
             }
-          }
 
-          var xTruncatedDomain = this._getTruncatedDomain(xDomain);
-          xAxis.tickValues(xTruncatedDomain);
-          if(xAxisOverview) {
-            xAxisOverview.tickValues(xTruncatedDomain);
+            var xTruncatedDomain = this._getTruncatedDomain(xDomain);
+            xAxis.tickValues(xTruncatedDomain);
+            if(xAxisOverview) {
+              xAxisOverview.tickValues(xTruncatedDomain);
+            }
           }
         },
 

@@ -106,6 +106,7 @@ limitations under the License.
         });
 
         test('_getD3Interval returns correct results', function() {
+          expect(element._getD3Interval('hour')).to.deep.equal(d3.time.hour);
           expect(element._getD3Interval('day')).to.deep.equal(d3.time.day);
           expect(element._getD3Interval('week')).to.deep.equal(d3.time.monday);
           expect(element._getD3Interval('month')).to.deep.equal(d3.time.month);
@@ -113,7 +114,8 @@ limitations under the License.
         });
 
         test('_getDateText returns correct results', function() {
-          expect(element._getDateText(new Date('Jan 1 2016'))).to.equal('Jan 1, 2016');
+          expect(element._getDateText(new Date('Jan 1 2016'), 'hour')).to.equal('05:00:00 Jan 1, 2016');
+          expect(element._getDateText(new Date('Jan 1 2016'), 'day')).to.equal('Jan 1, 2016');
           expect(element._getDateText(new Date('Jan 1 2016'), 'week')).to.equal('Week of Jan 1, 2016');
           expect(element._getDateText(new Date('Jan 1 2016'), 'month')).to.equal('Month of Jan 2016');
           expect(element._getDateText(new Date('Jan 1 2016'), 'year')).to.equal('Year of 2016');
@@ -136,7 +138,7 @@ limitations under the License.
             barValue: new Date('Jan 1 2016'),
           }, {
             barValue: new Date('Jan 31 2016')
-          }], true, 100);
+          }], true, 'day', 100);
           expect(domain.length).to.equal(31);
           expect(domain[0]).to.deep.equal(new Date('Jan 1 2016'));
           expect(domain[30]).to.deep.equal(new Date('Jan 31 2016'));
@@ -153,32 +155,194 @@ limitations under the License.
           expect(element._getDomainTimeFormat([new Date('Jan 31 2016'), new Date('Jan 1 2017')], 'year')).to.equal('%Y');
         });
 
-        test('_getNumberedAxisTickValues returns correct results for axisMin=0', function() {
-          expect(element._getNumberedAxisTickValues(0, 0)).to.deep.equal([0]);
-          expect(element._getNumberedAxisTickValues(0, 1)).to.deep.equal([0, 1]);
-          expect(element._getNumberedAxisTickValues(0, 9)).to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-          expect(element._getNumberedAxisTickValues(0, 10)).to.deep.equal([0, 2, 4, 6, 8, 10]);
-          expect(element._getNumberedAxisTickValues(0, 11)).to.deep.equal([0, 2, 4, 6, 8, 10]);
-          expect(element._getNumberedAxisTickValues(0, 19)).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14, 16, 18]);
-          expect(element._getNumberedAxisTickValues(0, 20)).to.deep.equal([0, 5, 10, 15, 20]);
-          expect(element._getNumberedAxisTickValues(0, 49)).to.deep.equal([0, 5, 10, 15, 20, 25, 30, 35, 40, 45]);
-          expect(element._getNumberedAxisTickValues(0, 50)).to.deep.equal([0, 10, 20, 30, 40, 50]);
-          expect(element._getNumberedAxisTickValues(0, 99)).to.deep.equal([0, 10, 20, 30, 40, 50, 60, 70, 80, 90]);
-          expect(element._getNumberedAxisTickValues(0, 100)).to.deep.equal([0, 20, 40, 60, 80, 100]);
-          expect(element._getNumberedAxisTickValues(0, 101)).to.deep.equal([0, 20, 40, 60, 80, 100]);
-          expect(element._getNumberedAxisTickValues(0, 199)).to.deep.equal([0, 20, 40, 60, 80, 100, 120, 140, 160, 180]);
-          expect(element._getNumberedAxisTickValues(0, 200)).to.deep.equal([0, 50, 100, 150, 200]);
-          expect(element._getNumberedAxisTickValues(0, 500)).to.deep.equal([0, 100, 200, 300, 400, 500]);
-          expect(element._getNumberedAxisTickValues(0, 1000)).to.deep.equal([0, 200, 400, 600, 800, 1000]);
+        test('_getNumberedAxisTickValues returns correct results for min=0', function() {
+          expect(element._getNumberedAxisTickValues(0, 0, 200)).to.deep.equal([0]);
+          expect(element._getNumberedAxisTickValues(0, 1, 200)).to.deep.equal([0, 1]);
+          expect(element._getNumberedAxisTickValues(0, 9, 200)).to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+          expect(element._getNumberedAxisTickValues(0, 10, 200)).to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+          expect(element._getNumberedAxisTickValues(0, 11, 200)).to.deep.equal([0, 2, 4, 6, 8, 10, 12]);
+          expect(element._getNumberedAxisTickValues(0, 19, 200)).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]);
+          expect(element._getNumberedAxisTickValues(0, 20, 200)).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]);
+          expect(element._getNumberedAxisTickValues(0, 21, 200)).to.deep.equal([0, 5, 10, 15, 20, 25]);
+          expect(element._getNumberedAxisTickValues(0, 49, 200)).to.deep.equal([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+          expect(element._getNumberedAxisTickValues(0, 50, 200)).to.deep.equal([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+          expect(element._getNumberedAxisTickValues(0, 51, 200)).to.deep.equal([0, 10, 20, 30, 40, 50, 60]);
+          expect(element._getNumberedAxisTickValues(0, 99, 200)).to.deep.equal([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+          expect(element._getNumberedAxisTickValues(0, 100, 200)).to.deep.equal([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+          expect(element._getNumberedAxisTickValues(0, 101, 200)).to.deep.equal([0, 20, 40, 60, 80, 100, 120]);
+          expect(element._getNumberedAxisTickValues(0, 199, 200)).to.deep.equal([0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]);
+          expect(element._getNumberedAxisTickValues(0, 200, 200)).to.deep.equal([0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]);
+          expect(element._getNumberedAxisTickValues(0, 201, 200)).to.deep.equal([0, 50, 100, 150, 200, 250]);
+          expect(element._getNumberedAxisTickValues(0, 499, 200)).to.deep.equal([0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]);
+          expect(element._getNumberedAxisTickValues(0, 500, 200)).to.deep.equal([0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]);
+          expect(element._getNumberedAxisTickValues(0, 501, 200)).to.deep.equal([0, 100, 200, 300, 400, 500, 600]);
         });
 
-        test('_getNumberedAxisTickValues returns correct results for axisMin>0', function() {
-          expect(element._getNumberedAxisTickValues(1, 10)).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-          expect(element._getNumberedAxisTickValues(1, 20)).to.deep.equal([1, 3, 5, 7, 9, 11, 13, 15, 17, 19]);
-          expect(element._getNumberedAxisTickValues(11, 20)).to.deep.equal([11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
-          expect(element._getNumberedAxisTickValues(1, 50)).to.deep.equal([1, 6, 11, 16, 21, 26, 31, 36, 41, 46]);
-          expect(element._getNumberedAxisTickValues(31, 50)).to.deep.equal([31, 33, 35, 37, 39, 41, 43, 45, 47, 49]);
-          expect(element._getNumberedAxisTickValues(41, 50)).to.deep.equal([41, 42, 43, 44, 45, 46, 47, 48, 49, 50]);
+        test('_getNumberedAxisTickValues returns correct results for min>0', function() {
+          expect(element._getNumberedAxisTickValues(1, 10, 200)).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+          expect(element._getNumberedAxisTickValues(1, 20, 200)).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]);
+          expect(element._getNumberedAxisTickValues(11, 20, 200)).to.deep.equal([11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
+          expect(element._getNumberedAxisTickValues(1, 50, 200)).to.deep.equal([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]);
+          expect(element._getNumberedAxisTickValues(31, 50, 200)).to.deep.equal([30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]);
+          expect(element._getNumberedAxisTickValues(41, 50, 200)).to.deep.equal([41, 42, 43, 44, 45, 46, 47, 48, 49, 50]);
+        });
+
+        test('_getNumberedAxisTickValues returns correct results for height=0', function() {
+          expect(element._getNumberedAxisTickValues(0, 10, 0)).to.deep.equal([0, 10]);
+          expect(element._getNumberedAxisTickValues(5, 20, 0)).to.deep.equal([5, 20]);
+        });
+
+        test('_getNumberedAxisTickValues returns correct results for height=20', function() {
+          expect(element._getNumberedAxisTickValues(0, 10, 20)).to.deep.equal([0, 10]);
+          expect(element._getNumberedAxisTickValues(5, 20, 20)).to.deep.equal([5, 20]);
+        });
+
+        test('_getNumberedAxisTickValues returns correct results for height=40', function() {
+          expect(element._getNumberedAxisTickValues(0, 2, 40)).to.deep.equal([0, 1, 2]);
+          expect(element._getNumberedAxisTickValues(0, 3, 40)).to.deep.equal([0, 2, 4]);
+          expect(element._getNumberedAxisTickValues(0, 4, 40)).to.deep.equal([0, 2, 4]);
+          expect(element._getNumberedAxisTickValues(0, 5, 40)).to.deep.equal([0, 3, 6]);
+          expect(element._getNumberedAxisTickValues(0, 6, 40)).to.deep.equal([0, 3, 6]);
+          expect(element._getNumberedAxisTickValues(0, 7, 40)).to.deep.equal([0, 4, 8]);
+          expect(element._getNumberedAxisTickValues(0, 8, 40)).to.deep.equal([0, 4, 8]);
+          expect(element._getNumberedAxisTickValues(0, 9, 40)).to.deep.equal([0, 5, 10]);
+          expect(element._getNumberedAxisTickValues(0, 10, 40)).to.deep.equal([0, 5, 10]);
+          expect(element._getNumberedAxisTickValues(0, 15, 40)).to.deep.equal([0, 8, 16]);
+          expect(element._getNumberedAxisTickValues(2, 12, 40)).to.deep.equal([2, 7, 12]);
+          expect(element._getNumberedAxisTickValues(5, 90, 40)).to.deep.equal([5, 48, 91]);
+        });
+
+        test('_getNumberedAxisTickValues returns correct results for height=60', function() {
+          expect(element._getNumberedAxisTickValues(0, 2, 60)).to.deep.equal([0, 1, 2]);
+          expect(element._getNumberedAxisTickValues(0, 3, 60)).to.deep.equal([0, 1, 2, 3]);
+          expect(element._getNumberedAxisTickValues(0, 4, 60)).to.deep.equal([0, 2, 4]);
+          expect(element._getNumberedAxisTickValues(0, 5, 60)).to.deep.equal([0, 2, 4, 6]);
+          expect(element._getNumberedAxisTickValues(0, 6, 60)).to.deep.equal([0, 2, 4, 6]);
+          expect(element._getNumberedAxisTickValues(0, 7, 60)).to.deep.equal([0, 5, 10]);
+          expect(element._getNumberedAxisTickValues(0, 8, 60)).to.deep.equal([0, 5, 10]);
+          expect(element._getNumberedAxisTickValues(0, 9, 60)).to.deep.equal([0, 5, 10]);
+          expect(element._getNumberedAxisTickValues(0, 10, 60)).to.deep.equal([0, 5, 10]);
+          expect(element._getNumberedAxisTickValues(0, 12, 60)).to.deep.equal([0, 5, 10, 15]);
+          expect(element._getNumberedAxisTickValues(0, 14, 60)).to.deep.equal([0, 5, 10, 15]);
+          expect(element._getNumberedAxisTickValues(0, 16, 60)).to.deep.equal([0, 10, 20]);
+          expect(element._getNumberedAxisTickValues(0, 18, 60)).to.deep.equal([0, 10, 20]);
+          expect(element._getNumberedAxisTickValues(0, 20, 60)).to.deep.equal([0, 10, 20]);
+          expect(element._getNumberedAxisTickValues(0, 22, 60)).to.deep.equal([0, 10, 20, 30]);
+          expect(element._getNumberedAxisTickValues(0, 24, 60)).to.deep.equal([0, 10, 20, 30]);
+        });
+
+        test('_getNumberedAxisTickValues returns correct results for height=80', function() {
+          expect(element._getNumberedAxisTickValues(0, 2, 80)).to.deep.equal([0, 1, 2]);
+          expect(element._getNumberedAxisTickValues(0, 3, 80)).to.deep.equal([0, 1, 2, 3]);
+          expect(element._getNumberedAxisTickValues(0, 4, 80)).to.deep.equal([0, 1, 2, 3, 4]);
+          expect(element._getNumberedAxisTickValues(0, 5, 80)).to.deep.equal([0, 2, 4, 6]);
+          expect(element._getNumberedAxisTickValues(0, 6, 80)).to.deep.equal([0, 2, 4, 6]);
+          expect(element._getNumberedAxisTickValues(0, 7, 80)).to.deep.equal([0, 2, 4, 6, 8]);
+          expect(element._getNumberedAxisTickValues(0, 8, 80)).to.deep.equal([0, 2, 4, 6, 8]);
+          expect(element._getNumberedAxisTickValues(0, 9, 80)).to.deep.equal([0, 5, 10]);
+          expect(element._getNumberedAxisTickValues(0, 10, 80)).to.deep.equal([0, 5, 10]);
+          expect(element._getNumberedAxisTickValues(0, 12, 80)).to.deep.equal([0, 5, 10, 15]);
+          expect(element._getNumberedAxisTickValues(0, 14, 80)).to.deep.equal([0, 5, 10, 15]);
+          expect(element._getNumberedAxisTickValues(0, 16, 80)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 18, 80)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 20, 80)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 22, 80)).to.deep.equal([0, 10, 20, 30]);
+          expect(element._getNumberedAxisTickValues(0, 24, 80)).to.deep.equal([0, 10, 20, 30]);
+        });
+
+        test('_getNumberedAxisTickValues returns correct results for height=100', function() {
+          expect(element._getNumberedAxisTickValues(0, 2, 100)).to.deep.equal([0, 1, 2]);
+          expect(element._getNumberedAxisTickValues(0, 3, 100)).to.deep.equal([0, 1, 2, 3]);
+          expect(element._getNumberedAxisTickValues(0, 4, 100)).to.deep.equal([0, 1, 2, 3, 4]);
+          expect(element._getNumberedAxisTickValues(0, 5, 100)).to.deep.equal([0, 1, 2, 3, 4, 5]);
+          expect(element._getNumberedAxisTickValues(0, 6, 100)).to.deep.equal([0, 2, 4, 6]);
+          expect(element._getNumberedAxisTickValues(0, 7, 100)).to.deep.equal([0, 2, 4, 6, 8]);
+          expect(element._getNumberedAxisTickValues(0, 8, 100)).to.deep.equal([0, 2, 4, 6, 8]);
+          expect(element._getNumberedAxisTickValues(0, 9, 100)).to.deep.equal([0, 2, 4, 6, 8, 10]);
+          expect(element._getNumberedAxisTickValues(0, 10, 100)).to.deep.equal([0, 2, 4, 6, 8, 10]);
+          expect(element._getNumberedAxisTickValues(0, 12, 100)).to.deep.equal([0, 5, 10, 15]);
+          expect(element._getNumberedAxisTickValues(0, 14, 100)).to.deep.equal([0, 5, 10, 15]);
+          expect(element._getNumberedAxisTickValues(0, 16, 100)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 18, 100)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 20, 100)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 22, 100)).to.deep.equal([0, 5, 10, 15, 20, 25]);
+          expect(element._getNumberedAxisTickValues(0, 24, 100)).to.deep.equal([0, 5, 10, 15, 20, 25]);
+        });
+
+        test('_getNumberedAxisTickValues returns correct results for height=120', function() {
+          expect(element._getNumberedAxisTickValues(0, 2, 120)).to.deep.equal([0, 1, 2]);
+          expect(element._getNumberedAxisTickValues(0, 3, 120)).to.deep.equal([0, 1, 2, 3]);
+          expect(element._getNumberedAxisTickValues(0, 4, 120)).to.deep.equal([0, 1, 2, 3, 4]);
+          expect(element._getNumberedAxisTickValues(0, 5, 120)).to.deep.equal([0, 1, 2, 3, 4, 5]);
+          expect(element._getNumberedAxisTickValues(0, 6, 120)).to.deep.equal([0, 1, 2, 3, 4, 5, 6]);
+          expect(element._getNumberedAxisTickValues(0, 7, 120)).to.deep.equal([0, 2, 4, 6, 8]);
+          expect(element._getNumberedAxisTickValues(0, 8, 120)).to.deep.equal([0, 2, 4, 6, 8]);
+          expect(element._getNumberedAxisTickValues(0, 9, 120)).to.deep.equal([0, 2, 4, 6, 8, 10]);
+          expect(element._getNumberedAxisTickValues(0, 10, 120)).to.deep.equal([0, 2, 4, 6, 8, 10]);
+          expect(element._getNumberedAxisTickValues(0, 12, 120)).to.deep.equal([0, 2, 4, 6, 8, 10, 12]);
+          expect(element._getNumberedAxisTickValues(0, 14, 120)).to.deep.equal([0, 5, 10, 15]);
+          expect(element._getNumberedAxisTickValues(0, 16, 120)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 18, 120)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 20, 120)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 22, 120)).to.deep.equal([0, 5, 10, 15, 20, 25]);
+          expect(element._getNumberedAxisTickValues(0, 24, 120)).to.deep.equal([0, 5, 10, 15, 20, 25]);
+        });
+
+        test('_getNumberedAxisTickValues returns correct results for height=140', function() {
+          expect(element._getNumberedAxisTickValues(0, 2, 140)).to.deep.equal([0, 1, 2]);
+          expect(element._getNumberedAxisTickValues(0, 3, 140)).to.deep.equal([0, 1, 2, 3]);
+          expect(element._getNumberedAxisTickValues(0, 4, 140)).to.deep.equal([0, 1, 2, 3, 4]);
+          expect(element._getNumberedAxisTickValues(0, 5, 140)).to.deep.equal([0, 1, 2, 3, 4, 5]);
+          expect(element._getNumberedAxisTickValues(0, 6, 140)).to.deep.equal([0, 1, 2, 3, 4, 5, 6]);
+          expect(element._getNumberedAxisTickValues(0, 7, 140)).to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7]);
+          expect(element._getNumberedAxisTickValues(0, 8, 140)).to.deep.equal([0, 2, 4, 6, 8]);
+          expect(element._getNumberedAxisTickValues(0, 9, 140)).to.deep.equal([0, 2, 4, 6, 8, 10]);
+          expect(element._getNumberedAxisTickValues(0, 10, 140)).to.deep.equal([0, 2, 4, 6, 8, 10]);
+          expect(element._getNumberedAxisTickValues(0, 12, 140)).to.deep.equal([0, 2, 4, 6, 8, 10, 12]);
+          expect(element._getNumberedAxisTickValues(0, 14, 140)).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14]);
+          expect(element._getNumberedAxisTickValues(0, 16, 140)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 18, 140)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 20, 140)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 22, 140)).to.deep.equal([0, 5, 10, 15, 20, 25]);
+          expect(element._getNumberedAxisTickValues(0, 24, 140)).to.deep.equal([0, 5, 10, 15, 20, 25]);
+        });
+
+        test('_getNumberedAxisTickValues returns correct results for height=160', function() {
+          expect(element._getNumberedAxisTickValues(0, 2, 160)).to.deep.equal([0, 1, 2]);
+          expect(element._getNumberedAxisTickValues(0, 3, 160)).to.deep.equal([0, 1, 2, 3]);
+          expect(element._getNumberedAxisTickValues(0, 4, 160)).to.deep.equal([0, 1, 2, 3, 4]);
+          expect(element._getNumberedAxisTickValues(0, 5, 160)).to.deep.equal([0, 1, 2, 3, 4, 5]);
+          expect(element._getNumberedAxisTickValues(0, 6, 160)).to.deep.equal([0, 1, 2, 3, 4, 5, 6]);
+          expect(element._getNumberedAxisTickValues(0, 7, 160)).to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7]);
+          expect(element._getNumberedAxisTickValues(0, 8, 160)).to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+          expect(element._getNumberedAxisTickValues(0, 9, 160)).to.deep.equal([0, 2, 4, 6, 8, 10]);
+          expect(element._getNumberedAxisTickValues(0, 10, 160)).to.deep.equal([0, 2, 4, 6, 8, 10]);
+          expect(element._getNumberedAxisTickValues(0, 12, 160)).to.deep.equal([0, 2, 4, 6, 8, 10, 12]);
+          expect(element._getNumberedAxisTickValues(0, 14, 160)).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14]);
+          expect(element._getNumberedAxisTickValues(0, 16, 160)).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14, 16]);
+          expect(element._getNumberedAxisTickValues(0, 18, 160)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 20, 160)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 22, 160)).to.deep.equal([0, 5, 10, 15, 20, 25]);
+          expect(element._getNumberedAxisTickValues(0, 24, 160)).to.deep.equal([0, 5, 10, 15, 20, 25]);
+        });
+
+        test('_getNumberedAxisTickValues returns correct results for height=180', function() {
+          expect(element._getNumberedAxisTickValues(0, 2, 180)).to.deep.equal([0, 1, 2]);
+          expect(element._getNumberedAxisTickValues(0, 3, 180)).to.deep.equal([0, 1, 2, 3]);
+          expect(element._getNumberedAxisTickValues(0, 4, 180)).to.deep.equal([0, 1, 2, 3, 4]);
+          expect(element._getNumberedAxisTickValues(0, 5, 180)).to.deep.equal([0, 1, 2, 3, 4, 5]);
+          expect(element._getNumberedAxisTickValues(0, 6, 180)).to.deep.equal([0, 1, 2, 3, 4, 5, 6]);
+          expect(element._getNumberedAxisTickValues(0, 7, 180)).to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7]);
+          expect(element._getNumberedAxisTickValues(0, 8, 180)).to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+          expect(element._getNumberedAxisTickValues(0, 9, 180)).to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+          expect(element._getNumberedAxisTickValues(0, 10, 180)).to.deep.equal([0, 2, 4, 6, 8, 10]);
+          expect(element._getNumberedAxisTickValues(0, 12, 180)).to.deep.equal([0, 2, 4, 6, 8, 10, 12]);
+          expect(element._getNumberedAxisTickValues(0, 14, 180)).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14]);
+          expect(element._getNumberedAxisTickValues(0, 16, 180)).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14, 16]);
+          expect(element._getNumberedAxisTickValues(0, 18, 180)).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14, 16, 18]);
+          expect(element._getNumberedAxisTickValues(0, 20, 180)).to.deep.equal([0, 5, 10, 15, 20]);
+          expect(element._getNumberedAxisTickValues(0, 22, 180)).to.deep.equal([0, 5, 10, 15, 20, 25]);
+          expect(element._getNumberedAxisTickValues(0, 24, 180)).to.deep.equal([0, 5, 10, 15, 20, 25]);
         });
 
         test('_getTruncatedDomain returns correct results', function() {
