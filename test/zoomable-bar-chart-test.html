@@ -54,7 +54,7 @@ limitations under the License.
           flush(done);
         });
 
-        test('data should equal array input', function() {
+        test('data is input array', function() {
           expect(element.data).to.be.deep.equal([{
             bar: 'July 01, 2016',
             stack: [{
@@ -69,7 +69,7 @@ limitations under the License.
           }]);
         });
 
-        test('_bars is correct', function() {
+        test('_bars is expected array', function() {
           expect(element._bars).to.be.an('array');
           expect(element._bars.length).to.equal(1);
           expect(element._bars[0]).to.be.an('object');
@@ -93,7 +93,7 @@ limitations under the License.
           expect(element._bars[0].barCount).to.equal(6);
         });
 
-        test('_legend is correct', function() {
+        test('_legend is expected array', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Other']);
         });
 
@@ -101,8 +101,69 @@ limitations under the License.
           expect(element.$$('svg').innerHTML).to.not.equal('');
         });
 
-        test('displayFilterText is correct', function() {
+        test('optional properties are set as expected', function() {
+          expect(element.barProperty).to.equal('bar');
+          expect(element.stackProperty).to.equal('stack');
+          expect(element.countProperty).to.equal('count');
+          expect(element.labelProperty).to.equal('label');
+          expect(element.defaultColor).to.equal('#757575');
+          expect(element.defaultLabel).to.equal('Other');
+          expect(element.height).to.equal(400);
+          expect(element.hideAxes).to.be.false;
+          expect(element.hideGrid).to.be.false;
+          expect(element.hideOverview).to.be.false;
+          expect(element.source).to.equal('Data');
+          expect(element.timeline).to.be.false;
+          expect(element.interval).to.equal('year');
+          expect(element.loading).to.be.false;
+          expect(element.selected).to.not.exist;
+          expect(element.selectedProperty).to.not.exist;
           expect(element.displayFilterText).to.be.false;
+        });
+
+        test('does not update _bars or _legend if load is false', function() {
+          element.load = false;
+          element._bars = [];
+          element._legend = [];
+
+          element.data = [{
+            bar: 'July 01, 2016',
+            stack: [{
+              label: 'Houston, TX, USA',
+              count: 4
+            }, {
+              label: 'Austin, TX, USA',
+              count: 0
+            }, {
+              count: 2
+            }]
+          }];
+          expect(element._bars).to.deep.equal([]);
+          expect(element._legend).to.deep.equal([]);
+
+          element.load = true;
+          expect(element._bars).to.be.an('array');
+          expect(element._bars.length).to.equal(1);
+          expect(element._bars[0]).to.be.an('object');
+          expect(element._bars[0].stacks).to.be.deep.equal([{
+            barCount: 6,
+            barLabel: 'July 01, 2016',
+            barValue: 'July 01, 2016',
+            stackLabel: 'Houston, TX, USA',
+            stackStart: 0,
+            stackEnd: 4
+          }, {
+            barCount: 6,
+            barLabel: 'July 01, 2016',
+            barValue: 'July 01, 2016',
+            stackLabel: 'Other',
+            stackStart: 4,
+            stackEnd: 6
+          }]);
+          expect(element._bars[0].barValue).to.equal('July 01, 2016');
+          expect(element._bars[0].barLabel).to.equal('July 01, 2016');
+          expect(element._bars[0].barCount).to.equal(6);
+          expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Other']);
         });
 
         test('_getD3Interval returns correct results', function() {
@@ -114,7 +175,7 @@ limitations under the License.
         });
 
         test('_getDateText returns correct results', function() {
-          expect(element._getDateText(new Date('Jan 1 2016'), 'hour')).to.equal('05:00:00 Jan 1, 2016');
+          expect(element._getDateText(new Date('Jan 1 2016'), 'hour')).to.equal('00:00 Jan 1, 2016');
           expect(element._getDateText(new Date('Jan 1 2016'), 'day')).to.equal('Jan 1, 2016');
           expect(element._getDateText(new Date('Jan 1 2016'), 'week')).to.equal('Week of Jan 1, 2016');
           expect(element._getDateText(new Date('Jan 1 2016'), 'month')).to.equal('Month of Jan 2016');
@@ -387,7 +448,7 @@ limitations under the License.
           flush(done);
         });
 
-        test('data should equal array input', function() {
+        test('data is input array', function() {
           expect(element.data).to.be.deep.equal([{
             myGroup: 'July 01, 2016',
             myArray: [{
@@ -402,7 +463,7 @@ limitations under the License.
           }]);
         });
 
-        test('_bars is correct', function() {
+        test('_bars is expected array', function() {
           expect(element._bars).to.be.an('array');
           expect(element._bars.length).to.equal(1);
           expect(element._bars[0]).to.be.an('object');
@@ -426,7 +487,7 @@ limitations under the License.
           expect(element._bars[0].barCount).to.equal(6);
         });
 
-        test('_legend is correct', function() {
+        test('_legend is expected array', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Thing']);
         });
 
@@ -458,7 +519,7 @@ limitations under the License.
           flush(done);
         });
 
-        test('data should equal array input', function() {
+        test('data is input array', function() {
           expect(element.data).to.be.deep.equal([{
             bar: 'July 01, 2016',
             stack: [{
@@ -473,7 +534,7 @@ limitations under the License.
           }]);
         });
 
-        test('_bars is correct', function() {
+        test('_bars is expected array', function() {
           expect(element._bars).to.be.an('array');
           expect(element._bars.length).to.equal(1);
           expect(element._bars[0]).to.be.an('object');
@@ -497,7 +558,7 @@ limitations under the License.
           expect(element._bars[0].barCount).to.equal(6);
         });
 
-        test('_legend is correct', function() {
+        test('_legend is expected array', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Other']);
         });
 
@@ -541,7 +602,7 @@ limitations under the License.
           flush(done);
         });
 
-        test('data should equal array input', function() {
+        test('data is input array', function() {
           expect(element.data).to.be.deep.equal([{
             bar: 'Jul 04, 2016',
             stack: [{
@@ -568,7 +629,7 @@ limitations under the License.
           }]);
         });
 
-        test('_bars is correct', function() {
+        test('_bars is expected array', function() {
           expect(element._bars.length).to.equal(4);
 
           expect(element._bars[0].barCount).to.equal(6);
@@ -620,7 +681,7 @@ limitations under the License.
           }]);
         });
 
-        test('_legend is correct', function() {
+        test('_legend is expected array', function() {
           expect(element._legend).to.be.deep.equal(['Houston, TX, USA', 'Other', 'San Antonio, TX, USA']);
         });
 
@@ -638,15 +699,15 @@ limitations under the License.
           flush(done);
         });
 
-        test('data should equal empty array', function() {
+        test('data is empty array', function() {
           expect(element.data).to.be.deep.equal([]);
         });
 
-        test('_bars should equal empty array', function() {
+        test('_bars is empty array', function() {
           expect(element._bars).to.be.deep.equal([]);
         });
 
-        test('_legend should equal empty array', function() {
+        test('_legend is empty array', function() {
           expect(element._legend).to.be.deep.equal([]);
         });
 
@@ -675,7 +736,7 @@ limitations under the License.
           flush(done);
         });
 
-        test('data should equal array input', function() {
+        test('data is input array', function() {
           expect(element.data).to.be.deep.equal([{
             bar: 'July 01, 2016',
             stack: [{
@@ -690,11 +751,11 @@ limitations under the License.
           }]);
         });
 
-        test('_bars should equal empty array', function() {
+        test('_bars is empty array', function() {
           expect(element._bars).to.be.deep.equal([]);
         });
 
-        test('_legend should equal empty array', function() {
+        test('_legend is empty array', function() {
           expect(element._legend).to.be.deep.equal([]);
         });
 

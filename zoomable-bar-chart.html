@@ -724,10 +724,10 @@ zoom in on specific areas of the data.
             .data(function(d) { return d.stacks; })
             .enter().append('rect')
             .attr('class', 'bar')
-            .attr('width', function() { return Math.max(x.rangeBand(), 8); })
+            .attr('width', function() { return Math.max(x.rangeBand(), 2); })
             .attr('y', function(d) { return y(d.stackEnd); })
             .attr('height', function(d) { return y(d.stackStart) - y(d.stackEnd); })
-            .style('stroke', '#212121')
+            .style('stroke', 'rgba(0,0,0,0)')
             .style('stroke-width', '1px')
             .style('fill', function(d) {
               if(d.stackLabel === self.defaultLabel || !color(d.stackLabel)) {
@@ -921,15 +921,15 @@ zoom in on specific areas of the data.
          */
         _getDateText: function(date, interval) {
           if(interval === 'week') {
-            return 'Week of ' + moment.utc(date).format('MMM D, YYYY');
+            return 'Week of ' + moment(date).format('MMM D, YYYY');
           }
           if(interval === 'month') {
-            return 'Month of ' + moment.utc(date).format('MMM YYYY');
+            return 'Month of ' + moment(date).format('MMM YYYY');
           }
           if(interval === 'year') {
-            return 'Year of ' + moment.utc(date).format('YYYY');
+            return 'Year of ' + moment(date).format('YYYY');
           }
-          return interval === 'day' ? moment.utc(date).format('MMM D, YYYY') : moment.utc(date).format('HH:mm:ss MMM D, YYYY');
+          return interval === 'day' ? moment(date).format('MMM D, YYYY') : moment(date).format('HH:mm MMM D, YYYY');
         },
 
         /**
