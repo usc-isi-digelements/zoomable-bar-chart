@@ -1167,7 +1167,6 @@ zoom in on specific areas of the data.
           var string = number.toString();
           var prefix = string.indexOf('.') >= 0 ? string.substring(0, string.indexOf('.')) : string;
           var suffix = string.indexOf('.') >= 0 ? string.substring(string.indexOf('.')) : '';
-          console.log('prefix=' + prefix + ' suffix=' + suffix + '#');
           return prefix.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + suffix;
         },
 
