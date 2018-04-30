@@ -592,21 +592,7 @@ zoom in on specific areas of the data.
 
           if(!this.hideAxes) {
             xAxis = d3.svg.axis().scale(x).orient('bottom');
-            yAxis = d3.svg.axis().scale(y).orient('left').tickFormat(function(tick) {
-              if(tick >= 1000000000000) {
-                return ('' + tick).substring(0, ('' + tick).length - 12) + ' T';
-              }
-              if(tick >= 1000000000) {
-                return ('' + tick).substring(0, ('' + tick).length - 9) + ' B';
-              }
-              if(tick >= 1000000) {
-                return ('' + tick).substring(0, ('' + tick).length - 6) + ' M';
-              }
-              if(tick >= 1000) {
-                return ('' + tick).substring(0, ('' + tick).length - 3) + ' K';
-              }
-              return '' + tick;
-            });
+            yAxis = d3.svg.axis().scale(y).orient('left').tickFormat(this._formatTickY);
             xAxisOverview = d3.svg.axis().scale(xOverview).orient('bottom');
           }
 
@@ -740,8 +726,8 @@ zoom in on specific areas of the data.
             })
             .on('mousemove', function(d) {
               // Add commas to pretty format numbers.
-              var barLabel = d.barCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-              var stackLabel = (d.stackEnd - d.stackStart).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+              var barLabel = self._numberToString(d.barCount);
+              var stackLabel = self._numberToString((d.stackEnd - d.stackStart));
               info.text(d.barLabel + ':  ' + (d.stackLabel ? (d.stackLabel + ' ') : '') + '(' + stackLabel + ' of ' + barLabel + ')');
             });
 
@@ -1123,6 +1109,66 @@ zoom in on specific areas of the data.
           } else {
             return 'Click + drag on the chart below to zoom.  Click elsewhere to reset the zoom.';
           }
+        },
+
+        /**
+         * Formats the given number for the Y-axis ticks and returns it as a string.
+         *
+         * @param {Number} tick
+         * @return {String}
+         * @private
+         */
+        _formatTickY: function(tick) {
+          var tickString = '' + Math.round(tick);
+          if(tick >= 1000000000000) {
+            var secondary = parseInt(tickString.substring(tickString.length - 12));
+            secondary = Math.trunc(Math.round(secondary / 100000000000.0));
+            var primary = parseInt(tickString.substring(0, tickString.length - 12)) + (secondary === 10 ? 1 : 0);
+            return primary + (secondary > 0 && secondary < 10 ? '.' + secondary : '') + ' T';
+          }
+          if(tick >= 1000000000) {
+            var secondary = parseInt(tickString.substring(tickString.length - 9));
+            secondary = Math.trunc(Math.round(secondary / 100000000.0));
+            var primary = parseInt(tickString.substring(0, tickString.length - 9)) + (secondary === 10 ? 1 : 0);
+            if(primary === 1000) {
+              return '1 T';
+            }
+            return primary + (secondary > 0 && secondary < 10 ? '.' + secondary : '') + ' B';
+          }
+          if(tick >= 1000000) {
+            var secondary = parseInt(tickString.substring(tickString.length - 6));
+            secondary = Math.trunc(Math.round(secondary / 100000.0));
+            var primary = parseInt(tickString.substring(0, tickString.length - 6)) + (secondary === 10 ? 1 : 0);
+            if(primary === 1000) {
+              return '1 B';
+            }
+            return primary + (secondary > 0 && secondary < 10 ? '.' + secondary : '') + ' M';
+          }
+          if(tick >= 1000) {
+            var secondary = parseInt(tickString.substring(tickString.length - 3));
+            secondary = Math.trunc(Math.round(secondary / 100.0));
+            var primary = parseInt(tickString.substring(0, tickString.length - 3)) + (secondary === 10 ? 1 : 0);
+            if(primary === 1000) {
+              return '1 M';
+            }
+            return primary + (secondary > 0 && secondary < 10 ? '.' + secondary : '') + ' K';
+          }
+          return tickString;
+        },
+
+        /**
+         * Formats the given number with commas and returns it as a string.
+         *
+         * @param {Number} number
+         * @return {String}
+         * @private
+         */
+        _numberToString: function(number) {
+          var string = number.toString();
+          var prefix = string.indexOf('.') >= 0 ? string.substring(0, string.indexOf('.')) : string;
+          var suffix = string.indexOf('.') >= 0 ? string.substring(string.indexOf('.')) : '';
+          console.log('prefix=' + prefix + ' suffix=' + suffix + '#');
+          return prefix.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + suffix;
         },
 
         /**

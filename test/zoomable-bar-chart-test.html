@@ -420,6 +420,54 @@ limitations under the License.
 
           expect(element._getSelectionInstructions()).to.equal('Click + drag on the chart below to zoom + filter.  Click elsewhere to reset.');
         });
+
+        test('_formatTickY does return expected string', function() {
+          expect(element._formatTickY(0)).to.equal('0');
+          expect(element._formatTickY(1)).to.equal('1');
+          expect(element._formatTickY(100)).to.equal('100');
+          expect(element._formatTickY(999)).to.equal('999');
+
+          expect(element._formatTickY(1000)).to.equal('1 K');
+          expect(element._formatTickY(1111)).to.equal('1.1 K');
+          expect(element._formatTickY(1999)).to.equal('2 K');
+          expect(element._formatTickY(99900)).to.equal('99.9 K');
+          expect(element._formatTickY(999900)).to.equal('999.9 K');
+          expect(element._formatTickY(999999)).to.equal('1 M');
+
+          expect(element._formatTickY(1000000)).to.equal('1 M');
+          expect(element._formatTickY(1111000)).to.equal('1.1 M');
+          expect(element._formatTickY(1999000)).to.equal('2 M');
+          expect(element._formatTickY(99900000)).to.equal('99.9 M');
+          expect(element._formatTickY(999900000)).to.equal('999.9 M');
+          expect(element._formatTickY(999999000)).to.equal('1 B');
+
+          expect(element._formatTickY(1000000000)).to.equal('1 B');
+          expect(element._formatTickY(1111000000)).to.equal('1.1 B');
+          expect(element._formatTickY(1999000000)).to.equal('2 B');
+          expect(element._formatTickY(99900000000)).to.equal('99.9 B');
+          expect(element._formatTickY(999900000000)).to.equal('999.9 B');
+          expect(element._formatTickY(999999000000)).to.equal('1 T');
+
+          expect(element._formatTickY(1000000000000)).to.equal('1 T');
+          expect(element._formatTickY(1111000000000)).to.equal('1.1 T');
+          expect(element._formatTickY(1999000000000)).to.equal('2 T');
+          expect(element._formatTickY(99900000000000)).to.equal('99.9 T');
+          expect(element._formatTickY(999900000000000)).to.equal('999.9 T');
+          expect(element._formatTickY(999999000000000)).to.equal('1000 T');
+        });
+
+        test('_numberToString does return expected string', function() {
+          expect(element._numberToString(0)).to.equal('0');
+          expect(element._numberToString(1)).to.equal('1');
+          expect(element._numberToString(100)).to.equal('100');
+          expect(element._numberToString(999)).to.equal('999');
+
+          expect(element._numberToString(1000)).to.equal('1,000');
+          expect(element._numberToString(123456789)).to.equal('123,456,789');
+
+          expect(element._numberToString(1.987654)).to.equal('1.987654');
+          expect(element._numberToString(123456789.987654)).to.equal('123,456,789.987654');
+        });
       });
 
       suite('<zoomable-bar-chart> with non-default properties', function() {
@@ -764,6 +812,5 @@ limitations under the License.
         });
       });
     </script>
-
   </body>
 </html>
