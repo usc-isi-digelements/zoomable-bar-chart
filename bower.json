@@ -21,7 +21,7 @@
     "polymer": "Polymer/polymer#^2.0.2",
     "d3-import": "usc-isi-digelements/d3-import#~1.0.0",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
-    "loading-spinner": "usc-isi-digelements/loading-spinner#2.0.0",
+    "loading-spinner": "usc-isi-digelements/loading-spinner#^2.0.0",
     "lodash-import": "usc-isi-digelements/lodash-import#~1.0.1",
     "moment-element": "uxland/moment-element#^1.1.3"
   },
